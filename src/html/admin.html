@@ -4,104 +4,73 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin — Interviewer</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; background: #f5f7fa; color: #1a1a2e; }
-    header { background: #2563eb; color: #fff; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
-    header h1 { font-size: 1.25rem; }
-    header nav a { color: #bfdbfe; text-decoration: none; margin-left: 1rem; font-size: 0.9rem; }
-    header nav a:hover { color: #fff; }
-    .user-menu { display: flex; align-items: center; gap: 0.75rem; margin-left: 1.5rem; }
-    .user-email { font-size: 0.82rem; color: #bfdbfe; }
-    .btn-signout { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 0.3rem 0.75rem; border-radius: 6px; font-size: 0.8rem; cursor: pointer; text-decoration: none; }
-    .btn-signout:hover { background: rgba(255,255,255,0.25); }
-    .container { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
-    /* Tabs */
-    .tabs { display: flex; gap: 0; border-bottom: 2px solid #e2e8f0; margin-bottom: 1.5rem; }
-    .tab-btn { background: none; border: none; padding: 0.65rem 1.25rem; cursor: pointer; font-size: 0.9rem; color: #64748b; border-bottom: 2px solid transparent; margin-bottom: -2px; font-weight: 500; }
-    .tab-btn:hover { color: #2563eb; }
-    .tab-btn.active { color: #2563eb; border-bottom-color: #2563eb; font-weight: 600; }
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
-    /* Toolbar */
-    .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-    .toolbar h2 { font-size: 1rem; font-weight: 600; color: #374151; }
-    button.primary { background: #2563eb; color: #fff; border: none; padding: 0.5rem 1.1rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: 600; }
-    button.primary:hover { background: #1d4ed8; }
-    button.secondary { background: #e5e7eb; color: #374151; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem; }
-    /* Tables */
-    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.1); font-size: 0.875rem; }
-    th, td { padding: 0.7rem 1rem; text-align: left; }
-    th { background: #f1f5f9; font-weight: 600; color: #475569; }
-    tr:not(:last-child) td { border-bottom: 1px solid #e2e8f0; }
-    tr:hover td { background: #f8fafc; }
-    .badge { display: inline-block; padding: 0.2rem 0.55rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
-    .badge-active   { background: #dcfce7; color: #15803d; }
-    .badge-inactive { background: #f3f4f6; color: #6b7280; }
-    .action-link { color: #2563eb; text-decoration: none; font-size: 0.85rem; cursor: pointer; }
-    .action-link.danger { color: #b91c1c; }
-    .action-link:hover { text-decoration: underline; }
-    /* Messages */
-    .msg { padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem; display: none; }
-    .msg.error   { background: #fee2e2; color: #b91c1c; display: block; }
-    .msg.success { background: #dcfce7; color: #15803d; display: block; }
-    /* Modal */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 100; justify-content: center; align-items: center; }
-    .modal-overlay.open { display: flex; }
-    .modal { background: #fff; border-radius: 10px; padding: 2rem; width: 100%; max-width: 440px; }
-    .modal h3 { margin-bottom: 1.25rem; font-size: 1rem; }
-    .field { margin-bottom: 1rem; }
-    .field label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; color: #374151; }
-    .field input { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem; }
-    .field input:focus { outline: none; border-color: #2563eb; }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem; }
-    /* Score Weights */
-    .weights-form { background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.1); padding: 1.5rem; }
-    .weight-row { display: flex; align-items: center; gap: 1rem; padding: 0.65rem 0; border-bottom: 1px solid #f1f5f9; }
-    .weight-row:last-of-type { border-bottom: none; }
-    .weight-label { flex: 1; font-size: 0.9rem; font-weight: 500; }
-    .weight-input { width: 80px; padding: 0.4rem 0.6rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem; text-align: right; }
-    .weight-input:focus { outline: none; border-color: #2563eb; }
-    .weight-pct { color: #64748b; font-size: 0.85rem; }
-    .weights-note { font-size: 0.82rem; color: #64748b; margin-top: 1rem; }
-    .weights-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem; }
-    /* Audit Log */
-    .audit-table td { vertical-align: top; }
-    .audit-action { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; background: #f1f5f9; color: #374151; }
-    .audit-action.CANDIDATE_CREATED { background: #dcfce7; color: #15803d; }
-    .audit-action.EVAL_SUBMITTED    { background: #dbeafe; color: #1d4ed8; }
-    .audit-action.EVAL_UPDATED      { background: #fef9c3; color: #854d0e; }
-    .audit-action.STATUS_CHANGED    { background: #f3e8ff; color: #7e22ce; }
-    .audit-action.WEIGHTS_UPDATED   { background: #ffedd5; color: #9a3412; }
-    .audit-detail { color: #6b7280; font-size: 0.82rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    @media (max-width: 640px) {
-      .tabs { overflow-x: auto; }
-      .tab-btn { white-space: nowrap; }
-      th, td { padding: 0.55rem 0.6rem; font-size: 0.8rem; }
-      .weight-row { flex-wrap: wrap; }
-      .weights-actions, .modal-actions { flex-direction: column; }
-      .weights-actions button, .modal-actions button { width: 100%; }
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Epilogue', 'sans-serif'], display: ['Epilogue', 'sans-serif'] },
+          colors: { 
+            base: '#FAFAF9', 
+            dark: '#0F172A', 
+            primary: '#10B981', 
+            secondary: '#34D399',
+            textBody: '#44403C',
+            textHeader: '#064E3B',
+            stone200: '#E5E7EB',
+            rebel: '#10B981'
+          }
+        }
+      }
     }
+  </script>
+  <style type="text/tailwindcss">
+    @layer base {
+      body { @apply bg-base text-textBody; }
+      h1, h2, h3, h4, th { @apply text-textHeader; }
+      input, select, textarea { @apply w-full p-4 rounded-xl bg-white shadow-sm font-medium text-textBody focus:outline-none focus:ring-2 focus:ring-primary/50 border border-stone200 transition-all; }
+    }
+    .btn-primary { @apply inline-block bg-primary text-white rounded-full px-8 py-3 font-display font-medium tracking-wide shadow-md transition-all hover:scale-[1.02] active:bg-secondary whitespace-nowrap cursor-pointer hover:shadow-lg disabled:opacity-50; }
+    .btn-secondary { @apply inline-block bg-white text-textBody border border-stone200 rounded-full px-8 py-3 font-display font-medium tracking-wide shadow-sm transition-all hover:scale-[1.02] whitespace-nowrap cursor-pointer; }
+    .nav-btn { @apply bg-white text-textBody rounded-full px-6 py-2 font-display font-medium shadow-sm border border-stone200 transition-all hover:scale-[1.02] cursor-pointer text-sm; }
+    
+    .tab-btn { @apply px-8 py-4 font-display font-medium text-textBody border-b-2 border-transparent bg-transparent transition-all hover:text-textHeader; margin-bottom: -2px;}
+    .tab-btn.active { @apply text-primary border-primary font-semibold; }
+    .tab-panel { @apply hidden bg-white shadow-sm border border-stone200 p-8 md:p-12 rounded-3xl z-0 relative mt-4; }
+    .tab-panel.active { @apply block; }
+
+    .badge { @apply inline-block px-4 py-2 font-display font-medium tracking-wider rounded-full shadow-sm; }
+    .badge-active   { @apply bg-primary/20 text-textHeader; }
+    .badge-inactive { @apply bg-stone200 text-textBody; }
+
+    .audit-action { @apply inline-block px-3 py-1 font-display font-medium tracking-wide text-[10px] rounded-full shadow-sm; }
+    .audit-action.CANDIDATE_CREATED { @apply bg-stone200/50 text-textBody; }
+    .audit-action.EVAL_SUBMITTED    { @apply bg-primary/10 text-textHeader; }
+    .audit-action.EVAL_UPDATED      { @apply bg-secondary/20 text-textHeader; }
+    .audit-action.STATUS_CHANGED    { @apply bg-primary/20 text-textHeader; }
+    .audit-action.WEIGHTS_UPDATED   { @apply bg-orange-100 text-orange-800; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Interviewer</h1>
-    <nav>
-      <a href="<?= webAppUrl ?>?page=candidates" target="_top">Candidates</a>
-      <a href="<?= webAppUrl ?>?page=summary" target="_top">Summary</a>
-      <a href="<?= webAppUrl ?>?page=admin" target="_top">Admin</a>
-      <div class="user-menu">
-        <span class="user-email"><?= userEmail ?></span>
-        <a class="btn-signout" href="https://accounts.google.com/Logout" target="_top">Sign Out</a>
+  <header class="bg-base/80 backdrop-blur-xl border-b border-stone200 text-textHeader p-6 md:px-10 flex justify-between items-center z-50 sticky top-0 mb-8">
+    <h1 class="font-display text-3xl font-semibold tracking-tight text-textHeader">Interviewer</h1>
+    <nav class="hidden md:flex gap-6 items-center">
+      <a href="<?= webAppUrl ?>?page=candidates" target="_top" class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all p-1">Candidates</a>
+      <a href="<?= webAppUrl ?>?page=summary" target="_top" class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all p-1">Summary</a>
+      <a href="<?= webAppUrl ?>?page=admin" target="_top" class="font-display font-medium tracking-wide text-textHeader font-semibold p-1">Admin</a>
+      <div class="flex items-center gap-4 ml-4">
+        <span class="text-sm font-bold text-textBody"><?= userEmail ?></span>
+        <a class="nav-btn" href="https://accounts.google.com/Logout" target="_top">Sign Out</a>
       </div>
     </nav>
   </header>
 
-  <div class="container">
-    <div id="msg" class="msg"></div>
+  <div class="max-w-[1000px] mx-auto p-4 md:p-8 mt-4">
+    <div id="msg" class="hidden mb-6 font-medium border border-stone200 p-4 shadow-sm rounded-xl"></div>
 
-    <div class="tabs">
+    <div class="flex flex-nowrap overflow-x-auto relative z-10 bottom-0 px-4 gap-4 border-b border-stone200">
       <button class="tab-btn active" onclick="switchTab('interviewers', this)">Interviewers</button>
       <button class="tab-btn" onclick="switchTab('weights', this)">Score Weights</button>
       <button class="tab-btn" onclick="switchTab('auditlog', this)">Audit Log</button>
@@ -109,116 +78,125 @@
 
     <!-- ── Tab 1: Interviewers ─────────────────────────────────────────── -->
     <div class="tab-panel active" id="tab-interviewers">
-      <div class="toolbar">
-        <h2>Interviewers</h2>
-        <button class="primary" onclick="openAddModal()">+ Add Interviewer</button>
+      <div class="flex justify-between items-center mb-6 border-b border-stone200 pb-4">
+        <h2 class="font-semibold text-2xl tracking-tight text-textHeader">Interviewers</h2>
+        <button class="btn-primary" onclick="openAddModal()">+ Add</button>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Email</th>
-            <th>Name</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="interviewersTbody">
-          <tr><td colspan="5" style="text-align:center;color:#94a3b8;">Loading…</td></tr>
-        </tbody>
-      </table>
+      <div class="overflow-x-auto bg-white border border-stone200 shadow-sm rounded-2xl">
+        <table class="w-full text-left border-collapse" >
+          <thead class="bg-stone200/20 text-textHeader">
+            <tr>
+              <th class="p-4 font-display font-medium tracking-wide border-b border-stone200 border-r">Email</th>
+              <th class="p-4 font-display font-medium tracking-wide border-b border-stone200 border-r">Name</th>
+              <th class="p-4 font-display font-medium tracking-wide border-b border-stone200 border-r">Role</th>
+              <th class="p-4 font-display font-medium tracking-wide border-b border-stone200 border-r">Status</th>
+              <th class="p-4 font-display font-medium tracking-wide border-b border-stone200">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="interviewersTbody">
+            <tr><td colspan="5" class="p-8 text-center font-medium text-textBody">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- ── Tab 2: Score Weights ────────────────────────────────────────── -->
     <div class="tab-panel" id="tab-weights">
-      <div class="toolbar"><h2>Score Weights</h2></div>
-      <div class="weights-form">
-        <div class="weight-row">
-          <span class="weight-label">Technical Skills</span>
-          <input class="weight-input" type="number" id="w-technical" min="0" max="100" step="1" value="20">
-          <span class="weight-pct">%</span>
+      <div class="flex justify-between items-center mb-6 border-b border-stone200 pb-4">
+        <h2 class="font-semibold text-2xl tracking-tight text-textHeader">Score Weights</h2>
+      </div>
+      <div class="bg-white border border-stone200 shadow-sm p-6 rounded-2xl max-w-xl mx-auto">
+        <div class="flex items-center justify-between p-4 hover:bg-stone200/20 border-b border-stone200 transition-colors">
+          <span class="font-display font-medium tracking-wide text-textHeader">Technical</span>
+          <div class="flex items-center gap-2">
+            <input class="w-24 text-center font-semibold" type="number" id="w-technical" min="0" max="100" step="0.01" value="33.33">
+            <span class="font-semibold text-textBody/50">%</span>
+          </div>
         </div>
-        <div class="weight-row">
-          <span class="weight-label">Problem Solving</span>
-          <input class="weight-input" type="number" id="w-problemSolving" min="0" max="100" step="1" value="20">
-          <span class="weight-pct">%</span>
+        <div class="flex items-center justify-between p-4 hover:bg-stone200/20 border-b border-stone200 transition-colors">
+          <span class="font-display font-medium tracking-wide text-textHeader">Leadership</span>
+          <div class="flex items-center gap-2">
+            <input class="w-24 text-center font-semibold" type="number" id="w-leadership" min="0" max="100" step="0.01" value="33.33">
+            <span class="font-semibold text-textBody/50">%</span>
+          </div>
         </div>
-        <div class="weight-row">
-          <span class="weight-label">Communication</span>
-          <input class="weight-input" type="number" id="w-communication" min="0" max="100" step="1" value="20">
-          <span class="weight-pct">%</span>
+        <div class="flex items-center justify-between p-4 hover:bg-stone200/20 transition-colors">
+          <span class="font-display font-medium tracking-wide text-textHeader">Stakeholder</span>
+          <div class="flex items-center gap-2">
+            <input class="w-24 text-center font-semibold" type="number" id="w-stakeholder" min="0" max="100" step="0.01" value="33.34">
+            <span class="font-semibold text-textBody/50">%</span>
+          </div>
         </div>
-        <div class="weight-row">
-          <span class="weight-label">System Design</span>
-          <input class="weight-input" type="number" id="w-systemDesign" min="0" max="100" step="1" value="20">
-          <span class="weight-pct">%</span>
-        </div>
-        <div class="weight-row">
-          <span class="weight-label">Culture Fit</span>
-          <input class="weight-input" type="number" id="w-cultureFit" min="0" max="100" step="1" value="20">
-          <span class="weight-pct">%</span>
-        </div>
-        <p class="weights-note">Values are relative weights — they don't need to sum to 100. The final score is a weighted average of all five categories.</p>
-        <div class="weights-actions">
-          <button class="secondary" onclick="resetWeights()">Reset to Equal</button>
-          <button class="primary" onclick="saveWeights()">Save Weights</button>
+        
+        <p class="font-medium text-sm text-textBody/70 mt-6 px-4">These values represent relative distribution weights across evaluation categories.</p>
+        
+        <div class="flex flex-col sm:flex-row justify-end gap-4 mt-8 pt-6 border-t border-stone200">
+          <button class="btn-secondary" onclick="resetWeights()">Reset to Equal</button>
+          <button class="btn-primary" onclick="saveWeights()">Save Weights</button>
         </div>
       </div>
     </div>
 
     <!-- ── Tab 3: Audit Log ────────────────────────────────────────────── -->
     <div class="tab-panel" id="tab-auditlog">
-      <div class="toolbar">
-        <h2>Audit Log</h2>
-        <button class="secondary" onclick="loadAuditLog()">↻ Refresh</button>
+      <div class="flex justify-between items-center mb-6 border-b border-stone200 pb-4">
+        <h2 class="font-semibold text-2xl tracking-tight text-textHeader">Audit Log</h2>
+        <button class="btn-secondary" onclick="loadAuditLog()">↻ Refresh</button>
       </div>
-      <table class="audit-table">
-        <thead>
-          <tr>
-            <th>Timestamp</th>
-            <th>User</th>
-            <th>Action</th>
-            <th>Entity</th>
-            <th>Detail</th>
-          </tr>
-        </thead>
-        <tbody id="auditTbody">
-          <tr><td colspan="5" style="text-align:center;color:#94a3b8;">Select the Audit Log tab to load entries.</td></tr>
-        </tbody>
-      </table>
+      <div class="overflow-x-auto bg-white border border-stone200 shadow-sm rounded-2xl h-[600px] overflow-y-auto">
+        <table class="w-full text-left border-collapse" >
+          <thead class="sticky top-0 bg-white shadow-sm ring-1 ring-stone200">
+            <tr class="text-textHeader">
+              <th class="p-3 font-semibold text-xs uppercase border-b border-r border-stone200">Date</th>
+              <th class="p-3 font-semibold text-xs uppercase border-b border-r border-stone200">User</th>
+              <th class="p-3 font-semibold text-xs uppercase border-b border-r border-stone200">Action</th>
+              <th class="p-3 font-semibold text-xs uppercase border-b border-r border-stone200">Entity</th>
+              <th class="p-3 font-semibold text-xs uppercase border-b border-stone200">Detail</th>
+            </tr>
+          </thead>
+          <tbody id="auditTbody">
+            <tr><td colspan="5" class="p-8 text-center font-medium text-textBody">Select the Audit Log tab to load entries.</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
   <!-- Add Interviewer Modal -->
-  <div class="modal-overlay" id="addModal">
-    <div class="modal">
-      <h3>Add Interviewer</h3>
-      <div class="field">
-        <label>Email *</label>
+  <div class="fixed inset-0 bg-dark/20 backdrop-blur-sm z-[100] flex justify-center items-center hidden" id="addModal">
+    <div class="bg-white border border-stone200 p-6 md:p-8 w-full max-w-lg shadow-xl rounded-3xl mx-4 transform transition-all relative top-1">
+      <h3 class="font-semibold text-2xl tracking-tight text-textHeader mb-6 border-b border-stone200 pb-4">Add Interviewer</h3>
+      <div class="mb-4">
+        <label class="block font-display font-medium tracking-wide text-sm mb-2 text-textHeader">Email *</label>
         <input type="email" id="inputEmail" placeholder="interviewer@example.com">
       </div>
-      <div class="field">
-        <label>Full Name *</label>
+      <div class="mb-4">
+        <label class="block font-display font-medium tracking-wide text-sm mb-2 text-textHeader">Name *</label>
         <input type="text" id="inputName" placeholder="Jane Doe">
       </div>
-      <div class="field">
-        <label>Role</label>
-        <input type="text" id="inputRole" placeholder="Senior Engineer">
+      <div class="mb-6">
+        <label class="block font-display font-medium tracking-wide text-sm mb-2 text-textHeader">Role</label>
+        <select id="inputRole">
+          <option value="Interviewer">Interviewer</option>
+          <option value="Admin">Admin</option>
+        </select>
+        <p class="text-xs text-textBody/70 mt-2 font-medium">Admins can manage interviewers, score weights, and view audit logs.</p>
       </div>
-      <div class="modal-actions">
-        <button class="secondary" onclick="closeAddModal()">Cancel</button>
-        <button class="primary" onclick="submitAdd()">Add</button>
+      <div class="flex justify-end gap-3 mt-8 pt-4 border-t border-stone200">
+        <button class="btn-secondary" onclick="closeAddModal(); event.preventDefault()">Cancel</button>
+        <button class="btn-primary" onclick="submitAddInterviewer(); event.preventDefault()">Add Access</button>
       </div>
     </div>
   </div>
 
   <script>
+    var APP_URL = '<?= webAppUrl ?>';
+    var CURRENT_USER_EMAIL = '<?= userEmail ?>'.toLowerCase();
     var auditLoaded = false;
     var weightsLoaded = false;
 
     function escHtml(s) { var d = document.createElement('div'); d.textContent = String(s || ''); return d.innerHTML; }
 
-    // ── Tabs ──────────────────────────────────────────────────────────────────
     function switchTab(name, btn) {
       document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
       document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -228,13 +206,12 @@
       if (name === 'auditlog' && !auditLoaded)  { loadAuditLog(); }
     }
 
-    // ── Interviewers ──────────────────────────────────────────────────────────
     function loadInterviewers() {
       google.script.run
         .withSuccessHandler(function(list) {
           var tbody = document.getElementById('interviewersTbody');
           if (!list.length) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#94a3b8;">No interviewers yet.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center font-bold text-gray-500">No interviewers yet.</td></tr>';
             return;
           }
           tbody.innerHTML = list.map(function(iv) {
@@ -242,13 +219,13 @@
             var badgeCls = active ? 'badge-active' : 'badge-inactive';
             var badgeText = active ? 'Active' : 'Inactive';
             var toggleLabel = active ? 'Deactivate' : 'Activate';
-            var toggleCls = active ? 'action-link danger' : 'action-link';
-            return '<tr>' +
-              '<td>' + escHtml(iv.email) + '</td>' +
-              '<td>' + escHtml(iv.name) + '</td>' +
-              '<td>' + escHtml(iv.role) + '</td>' +
-              '<td><span class="badge ' + badgeCls + '">' + badgeText + '</span></td>' +
-              '<td><a class="' + toggleCls + '" onclick="toggleInterviewer(' + escHtml(JSON.stringify(iv.email)) + ',' + active + ')">' + toggleLabel + '</a></td>' +
+            var toggleCls = active ? 'bg-[#ff6b6b] text-white hover:bg-red-700' : 'bg-dark text-white hover:bg-dark/80';
+            return '<tr class="font-medium hover:bg-stone200/30 border-b border-stone200 last:border-b-0 group transition-colors">' +
+              '<td class="p-4 border-r border-stone200 font-medium text-textBody">' + escHtml(iv.email) + '</td>' +
+              '<td class="p-4 border-r border-stone200 font-semibold text-textHeader">' + escHtml(iv.name) + '</td>' +
+              '<td class="p-4 border-r border-stone200 text-textBody text-sm">' + escHtml(iv.role) + '</td>' +
+              '<td class="p-4 border-r border-stone200"><span class="badge ' + badgeCls + '">' + badgeText + '</span></td>' +
+              '<td class="p-4"><button class="px-4 py-1.5 font-semibold text-xs uppercase tracking-tight rounded-full transition-all ' + toggleCls + '" data-email="' + escHtml(iv.email) + '" data-active="' + active + '" onclick="toggleInterviewerAction(this)">' + toggleLabel + '</button></td>' +
             '</tr>';
           }).join('');
         })
@@ -256,28 +233,38 @@
         .getInterviewers();
     }
 
+    function toggleInterviewerAction(button) {
+      toggleInterviewer(button.getAttribute('data-email'), button.getAttribute('data-active') === 'true');
+    }
+
     function toggleInterviewer(email, currentlyActive) {
+      var nextActive = !currentlyActive;
       google.script.run
         .withSuccessHandler(function() {
           showSuccess('Interviewer ' + (currentlyActive ? 'deactivated' : 'activated') + '.');
+          if (!nextActive && String(email || '').toLowerCase() === CURRENT_USER_EMAIL) {
+            setTimeout(function() {
+              window.open(APP_URL + '?page=candidates', '_top');
+            }, 800);
+            return;
+          }
           loadInterviewers();
         })
         .withFailureHandler(showError)
-        .toggleInterviewer(email, !currentlyActive);
+        .toggleInterviewer(email, nextActive);
     }
 
-    function openAddModal() { document.getElementById('addModal').classList.add('open'); }
+    function openAddModal() { document.getElementById('addModal').classList.remove('hidden'); }
     function closeAddModal() {
-      document.getElementById('addModal').classList.remove('open');
+      document.getElementById('addModal').classList.add('hidden');
       document.getElementById('inputEmail').value = '';
       document.getElementById('inputName').value  = '';
-      document.getElementById('inputRole').value  = '';
     }
 
-    function submitAdd() {
+    function submitAddInterviewer() {
       var email = document.getElementById('inputEmail').value.trim();
       var name  = document.getElementById('inputName').value.trim();
-      var role  = document.getElementById('inputRole').value.trim();
+      var role  = document.getElementById('inputRole').value;
       if (!email) { showError('Email is required.'); return; }
       if (!name)  { showError('Name is required.'); return; }
       google.script.run
@@ -286,34 +273,30 @@
         .addInterviewer({ email: email, name: name, role: role });
     }
 
-    // ── Score Weights ─────────────────────────────────────────────────────────
     function loadWeights() {
       google.script.run
         .withSuccessHandler(function(w) {
           weightsLoaded = true;
           document.getElementById('w-technical').value      = w.technical;
-          document.getElementById('w-problemSolving').value = w.problemSolving;
-          document.getElementById('w-communication').value  = w.communication;
-          document.getElementById('w-systemDesign').value   = w.systemDesign;
-          document.getElementById('w-cultureFit').value     = w.cultureFit;
+          document.getElementById('w-leadership').value     = w.leadership;
+          document.getElementById('w-stakeholder').value    = w.stakeholder;
         })
         .withFailureHandler(showError)
         .getScoreWeights();
     }
 
     function resetWeights() {
-      ['technical', 'problemSolving', 'communication', 'systemDesign', 'cultureFit'].forEach(function(k) {
-        document.getElementById('w-' + k).value = 20;
+      var defaults = { technical: 33.33, leadership: 33.33, stakeholder: 33.34 };
+      Object.keys(defaults).forEach(function(k) {
+        document.getElementById('w-' + k).value = defaults[k];
       });
     }
 
     function saveWeights() {
       var weights = {
         technical:      Number(document.getElementById('w-technical').value),
-        problemSolving: Number(document.getElementById('w-problemSolving').value),
-        communication:  Number(document.getElementById('w-communication').value),
-        systemDesign:   Number(document.getElementById('w-systemDesign').value),
-        cultureFit:     Number(document.getElementById('w-cultureFit').value)
+        leadership:     Number(document.getElementById('w-leadership').value),
+        stakeholder:    Number(document.getElementById('w-stakeholder').value)
       };
       var keys = Object.keys(weights);
       for (var i = 0; i < keys.length; i++) {
@@ -328,26 +311,25 @@
         .saveScoreWeights(weights);
     }
 
-    // ── Audit Log ─────────────────────────────────────────────────────────────
     function loadAuditLog() {
       document.getElementById('auditTbody').innerHTML =
-        '<tr><td colspan="5" style="text-align:center;color:#94a3b8;">Loading…</td></tr>';
+        '<tr><td colspan="5" class="p-8 text-center font-bold text-gray-500">Loading…</td></tr>';
       google.script.run
         .withSuccessHandler(function(logs) {
           auditLoaded = true;
           var tbody = document.getElementById('auditTbody');
           if (!logs.length) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#94a3b8;">No audit entries yet.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center font-bold text-gray-500">No audit entries yet.</td></tr>';
             return;
           }
           tbody.innerHTML = logs.map(function(entry) {
             var actionCls = 'audit-action ' + entry.action.replace(/[^A-Z_]/g, '');
-            return '<tr>' +
-              '<td style="white-space:nowrap;font-size:.8rem;">' + escHtml((entry.timestamp || '').substring(0, 19)) + '</td>' +
-              '<td style="font-size:.82rem;">' + escHtml(entry.userEmail) + '</td>' +
-              '<td><span class="' + escHtml(actionCls) + '">' + escHtml(entry.action) + '</span></td>' +
-              '<td style="font-size:.82rem;">' + escHtml(entry.entityType) + (entry.entityId ? '<br><span style="color:#94a3b8;font-size:.75rem;">' + escHtml(entry.entityId.substring(0, 18)) + '</span>' : '') + '</td>' +
-              '<td class="audit-detail" title="' + escHtml(entry.detail) + '">' + escHtml(entry.detail) + '</td>' +
+            return '<tr class="font-medium hover:bg-stone200/30 border-b border-stone200 last:border-b-0 group transition-colors">' +
+              '<td class="p-3 border-r border-stone200 text-xs whitespace-nowrap text-textBody">' + escHtml((entry.timestamp || '').substring(0, 19)) + '</td>' +
+              '<td class="p-3 border-r border-stone200 text-xs text-textBody">' + escHtml(entry.userEmail) + '</td>' +
+              '<td class="p-3 border-r border-stone200"><span class="' + escHtml(actionCls) + '">' + escHtml(entry.action) + '</span></td>' +
+              '<td class="p-3 border-r border-stone200 text-xs font-bold text-textHeader">' + escHtml(entry.entityType) + (entry.entityId ? '<br><span class="opacity-50 tracking-tighter">' + escHtml(entry.entityId.substring(0, 18)) + '</span>' : '') + '</td>' +
+              '<td class="p-3 text-xs italic text-textBody max-w-[200px] truncate" title="' + escHtml(entry.detail) + '">' + escHtml(entry.detail) + '</td>' +
             '</tr>';
           }).join('');
         })
@@ -355,18 +337,17 @@
         .getAuditLogs();
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
     function showError(e) {
       var msg = document.getElementById('msg');
-      msg.className = 'msg error';
+      msg.className = 'mb-6 font-bold border-none p-4 shadow-neu-flat rounded-[30px] block bg-base shadow-neu-pressed text-[#b91c1c]';
       msg.textContent = typeof e === 'string' ? e : (e.message || 'An error occurred.');
-      setTimeout(function() { msg.className = 'msg'; }, 6000);
+      setTimeout(function() { msg.className = 'hidden'; }, 6000);
     }
     function showSuccess(text) {
       var msg = document.getElementById('msg');
-      msg.className = 'msg success';
+      msg.className = 'mb-6 font-bold border-none p-4 shadow-neu-flat rounded-[30px] block bg-base shadow-neu-pressed text-[#15803d]';
       msg.textContent = text;
-      setTimeout(function() { msg.className = 'msg'; }, 4000);
+      setTimeout(function() { msg.className = 'hidden'; }, 4000);
     }
 
     loadInterviewers();

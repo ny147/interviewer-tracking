@@ -11,6 +11,7 @@ var Candidates = (function () {
 
   var HEADERS = ['ID', 'Name', 'Position', 'Level', 'Status', 'CreatedAt', 'CreatedBy'];
   var COL = { ID: 0, NAME: 1, POSITION: 2, LEVEL: 3, STATUS: 4, CREATED_AT: 5, CREATED_BY: 6 };
+  var VALID_STATUSES = ['Active', 'Hired', 'Rejected'];
 
   function getSheet_() {
     return SpreadsheetApp.openById(Config.getSheetId()).getSheetByName('Candidates');
@@ -97,6 +98,10 @@ var Candidates = (function () {
    * @param {string} status  e.g. 'Active' | 'Hired' | 'Rejected'
    */
   function updateCandidateStatus(id, status) {
+    if (VALID_STATUSES.indexOf(status) === -1) {
+      throw new Error('Invalid candidate status: ' + status);
+    }
+
     var sheet = getSheet_();
     var rows = getAllRows_();
     for (var i = 0; i < rows.length; i++) {

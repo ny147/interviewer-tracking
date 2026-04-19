@@ -84,8 +84,8 @@ The system ensures:
 
 * `src/Summary.js`:
 
-  * Average per category (TechnicalSkills, ProblemSolving, Communication, SystemDesign, CultureFit)
-  * Final score = mean of 5 category averages
+  * Average per category (Technical, Leadership, Stakeholder)
+  * Final score = mean of 3 category averages
   * Auto-triggered on every `submitEval` / `updateEval`
   * `refreshSummary(candidateId)` for manual refresh
 
@@ -104,7 +104,7 @@ The system ensures:
 
 #### 6b — Weighted Scoring ⬜
 
-* Allow configurable per-category weights (e.g. Technical 30%, SystemDesign 25%, …)
+* Allow configurable per-category weights (e.g. Technical 40%, Leadership 30%, Stakeholder 30%)
 * Store weights in Script Properties: `SCORE_WEIGHTS`
 * Update `Summary.computeScores()` to apply weights
 * Add weights editor in admin UI

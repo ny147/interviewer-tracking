@@ -4,87 +4,70 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Candidates — Interviewer</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; background: #f5f7fa; color: #1a1a2e; }
-    header { background: #2563eb; color: #fff; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
-    header h1 { font-size: 1.25rem; }
-    header nav a { color: #bfdbfe; text-decoration: none; margin-left: 1rem; font-size: 0.9rem; }
-    header nav a:hover { color: #fff; }
-    .user-menu { display: flex; align-items: center; gap: 0.75rem; margin-left: 1.5rem; }
-    .user-email { font-size: 0.82rem; color: #bfdbfe; }
-    .btn-signout { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 0.3rem 0.75rem; border-radius: 6px; font-size: 0.8rem; cursor: pointer; text-decoration: none; transition: background 0.15s; }
-    .btn-signout:hover { background: rgba(255,255,255,0.25); }
-    .container { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
-    .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-    .toolbar h2 { font-size: 1.1rem; }
-    .search-bar { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem; }
-    .search-bar input { flex: 1; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem; }
-    .search-bar select { padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem; background: #fff; }
-    button.primary { background: #2563eb; color: #fff; border: none; padding: 0.5rem 1.1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
-    button.primary:hover { background: #1d4ed8; }
-    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
-    th, td { padding: 0.75rem 1rem; text-align: left; font-size: 0.9rem; }
-    th { background: #f1f5f9; font-weight: 600; color: #475569; }
-    tr:not(:last-child) td { border-bottom: 1px solid #e2e8f0; }
-    tr:hover td { background: #f8fafc; }
-    .badge { display: inline-block; padding: 0.2rem 0.55rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
-    .badge-active  { background: #dcfce7; color: #15803d; }
-    .badge-hired   { background: #dbeafe; color: #1d4ed8; }
-    .badge-rejected{ background: #fee2e2; color: #b91c1c; }
-    .action-link { color: #2563eb; text-decoration: none; font-size: 0.85rem; }
-    .action-link:hover { text-decoration: underline; }
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 100; justify-content: center; align-items: center; }
-    .modal-overlay.open { display: flex; }
-    .modal { background: #fff; border-radius: 10px; padding: 2rem; width: 100%; max-width: 440px; }
-    .modal h3 { margin-bottom: 1.25rem; font-size: 1rem; }
-    .field { margin-bottom: 1rem; }
-    .field label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; color: #374151; }
-    .field input, .field select { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem; }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem; }
-    button.secondary { background: #e5e7eb; color: #374151; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
-    .msg { padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.9rem; display: none; }
-    .msg.error   { background: #fee2e2; color: #b91c1c; display: block; }
-    .msg.success { background: #dcfce7; color: #15803d; display: block; }
-    @media (max-width: 640px) {
-      .container { margin: 1rem auto; }
-      .toolbar { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-      .search-bar { flex-direction: column; }
-      .search-bar input, .search-bar select { width: 100%; }
-      table { font-size: 0.8rem; }
-      th, td { padding: 0.55rem 0.5rem; }
-      th:nth-child(3), td:nth-child(3) { display: none; }
-      .modal { margin: 0 1rem; }
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Epilogue', 'sans-serif'], display: ['Epilogue', 'sans-serif'] },
+          colors: { 
+            base: '#FAFAF9', 
+            dark: '#0F172A', 
+            primary: '#10B981', 
+            secondary: '#34D399',
+            textBody: '#44403C',
+            textHeader: '#064E3B',
+            stone200: '#E5E7EB',
+            rebel: '#10B981'
+          }
+        }
+      }
     }
+  </script>
+  <style type="text/tailwindcss">
+    @layer base {
+      body { @apply bg-base text-textBody; }
+      h1, h2, h3, h4, th { @apply text-textHeader; }
+      input, select, textarea { @apply w-full p-4 rounded-xl bg-white shadow-sm border border-stone200 font-medium text-textBody focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all; }
+    }
+    .btn-primary { @apply inline-block bg-primary text-white rounded-full px-8 py-3 font-display font-medium tracking-wide shadow-md transition-all hover:scale-[1.02] active:bg-secondary whitespace-nowrap cursor-pointer; }
+    .btn-secondary { @apply inline-block bg-white text-textBody border border-stone200 rounded-full px-8 py-3 font-display font-medium tracking-wide shadow-sm transition-all hover:scale-[1.02] whitespace-nowrap cursor-pointer; }
+    .nav-btn { @apply bg-white text-textBody rounded-full px-6 py-2 font-display font-medium shadow-sm border border-stone200 transition-all hover:scale-[1.02] cursor-pointer text-sm; }
+    
+    .badge-active { @apply inline-block bg-primary/20 text-textHeader px-4 py-1 font-display font-medium tracking-wide text-xs rounded-full shadow-sm; }
+    .badge-hired { @apply inline-block bg-secondary/20 text-textHeader border border-secondary/30 px-4 py-1 font-display font-medium tracking-wide text-xs rounded-full shadow-sm; }
+    .badge-rejected { @apply inline-block bg-[#ff6b6b]/10 text-[#991b1b] border border-[#ff6b6b]/30 px-4 py-1 font-display font-medium tracking-wide text-xs rounded-full shadow-sm; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Interviewer</h1>
-    <nav>
-      <a href="<?= webAppUrl ?>?page=candidates" target="_top">Candidates</a>
-      <a href="<?= webAppUrl ?>?page=summary" target="_top">Summary</a>
-      <? if (isAdmin) { ?><a href="<?= webAppUrl ?>?page=admin" target="_top">Admin</a><? } ?>
-      <div class="user-menu">
-        <span class="user-email"><?= userEmail ?></span>
-        <a class="btn-signout" href="https://accounts.google.com/Logout" target="_top">Sign Out</a>
+  <header class="bg-base/80 backdrop-blur-xl border-b border-stone200 text-textHeader p-6 md:px-10 flex justify-between items-center z-50 sticky top-0 mb-8">
+    <h1 class="font-display text-3xl font-semibold tracking-tight text-textHeader">Interviewer</h1>
+    <nav class="hidden md:flex gap-6 items-center">
+      <a href="<?= webAppUrl ?>?page=candidates" target="_top" class="font-display font-medium tracking-wide text-textHeader font-semibold">Candidates</a>
+      <a href="<?= webAppUrl ?>?page=summary" target="_top" class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all p-1">Summary</a>
+      <? if (isAdmin) { ?><a href="<?= webAppUrl ?>?page=admin" target="_top" class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all p-1">Admin</a><? } ?>
+      <div class="flex items-center gap-4 ml-4">
+        <span class="text-sm font-bold text-textBody"><?= userEmail ?></span>
+        <a class="nav-btn" href="https://accounts.google.com/Logout" target="_top">Sign Out</a>
       </div>
     </nav>
   </header>
 
-  <div class="container">
-    <div class="toolbar">
-      <h2>Candidates</h2>
+  <div class="max-w-5xl mx-auto p-4 md:p-8 mt-4">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+      <h2 class="font-display text-4xl font-medium tracking-tight">Candidates</h2>
       <? if (isAdmin) { ?>
-        <button class="primary" onclick="openAddModal()">+ Add Candidate</button>
+        <button class="btn-primary" onclick="openAddModal()">+ Add Candidate</button>
       <? } ?>
     </div>
 
-    <div id="msg" class="msg"></div>
+    <div id="msg" class="hidden mb-6 font-medium border border-stone200 p-4 shadow-sm rounded-xl"></div>
 
-    <div class="search-bar">
+    <div class="flex flex-col md:flex-row gap-4 mb-8 bg-white border border-stone200 p-4 shadow-sm rounded-2xl">
       <input type="text" id="searchInput" placeholder="Search by name or position…" oninput="filterTable()">
-      <select id="statusFilter" onchange="filterTable()">
+      <select id="statusFilter" onchange="filterTable()" class="w-full md:w-64">
         <option value="">All Statuses</option>
         <option value="Active">Active</option>
         <option value="Hired">Hired</option>
@@ -92,36 +75,38 @@
       </select>
     </div>
 
-    <table id="candidateTable">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Position</th>
-          <th>Level</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="tbody">
-        <tr><td colspan="5" style="text-align:center;color:#94a3b8;">Loading…</td></tr>
-      </tbody>
-    </table>
+    <div class="overflow-x-auto bg-white border border-stone200 shadow-sm rounded-2xl">
+      <table id="candidateTable" class="w-full border-collapse" >
+        <thead class="bg-stone200/20">
+          <tr>
+            <th class="p-4 text-left font-display font-medium tracking-wide text-textHeader border-b border-stone200 border-r">Name</th>
+            <th class="p-4 text-left font-display font-medium tracking-wide text-textHeader border-b border-stone200 border-r">Position</th>
+            <th class="p-4 text-left font-display font-medium tracking-wide text-textHeader border-b border-stone200 border-r hidden md:table-cell">Level</th>
+            <th class="p-4 text-left font-display font-medium tracking-wide text-textHeader border-b border-stone200 border-r">Status</th>
+            <th class="p-4 text-left font-display font-medium tracking-wide text-textHeader border-b border-stone200">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="5" class="p-8 text-center font-medium text-textBody">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <!-- Add Candidate Modal -->
-  <div class="modal-overlay" id="addModal">
-    <div class="modal">
-      <h3>Add Candidate</h3>
-      <div class="field">
-        <label>Full Name *</label>
+  <div class="fixed inset-0 bg-dark/20 backdrop-blur-sm z-[100] flex justify-center items-center hidden" id="addModal">
+    <div class="bg-white border border-stone200 p-6 md:p-8 w-full max-w-lg shadow-xl rounded-3xl mx-4 transform transition-all">
+      <h3 class="font-semibold text-2xl tracking-tight text-textHeader mb-6">Add Candidate</h3>
+      <div class="mb-4">
+        <label class="block font-display font-medium tracking-wide text-sm mb-2">Full Name *</label>
         <input type="text" id="inputName" placeholder="Jane Doe">
       </div>
-      <div class="field">
-        <label>Position *</label>
+      <div class="mb-4">
+        <label class="block font-display font-medium tracking-wide text-sm mb-2">Position *</label>
         <input type="text" id="inputPosition" placeholder="Senior Data Engineer">
       </div>
-      <div class="field">
-        <label>Level</label>
+      <div class="mb-6">
+        <label class="block font-display font-medium tracking-wide text-sm mb-2">Level</label>
         <select id="inputLevel">
           <option value="Junior">Junior</option>
           <option value="Mid" selected>Mid</option>
@@ -129,42 +114,74 @@
           <option value="Staff">Staff</option>
         </select>
       </div>
-      <div class="modal-actions">
-        <button class="secondary" onclick="closeAddModal()">Cancel</button>
-        <button class="primary" onclick="submitAdd()">Add</button>
+      <div class="flex justify-end gap-4 mt-6">
+        <button class="btn-secondary" onclick="closeAddModal()">Cancel</button>
+        <button class="btn-primary" onclick="submitAdd()">Add</button>
       </div>
     </div>
   </div>
 
   <script>
     var APP_URL = '<?= webAppUrl ?>';
+    var IS_ADMIN = <?!= JSON.stringify(isAdmin) ?>;
     var allCandidates = [];
 
     function statusBadge(status) {
       var cls = status === 'Hired' ? 'badge-hired' : status === 'Rejected' ? 'badge-rejected' : 'badge-active';
-      return '<span class="badge ' + cls + '">' + escHtml(status) + '</span>';
+      return '<span class="' + cls + '">' + escHtml(status) + '</span>';
     }
     function escHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
     function renderTable(list) {
       var tbody = document.getElementById('tbody');
       if (!list.length) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#94a3b8;">No candidates found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center font-bold text-gray-500">No candidates found.</td></tr>';
         return;
       }
       tbody.innerHTML = list.map(function(c) {
-        return '<tr>' +
-          '<td>' + escHtml(c.name) + '</td>' +
-          '<td>' + escHtml(c.position) + '</td>' +
-          '<td>' + escHtml(c.level) + '</td>' +
-          '<td>' + statusBadge(c.status) + '</td>' +
-          '<td>' +
-            '<a class="action-link" href="' + APP_URL + '?page=eval&candidateId=' + encodeURIComponent(c.id) + '" target="_top">Evaluate</a>' +
-            ' &nbsp; ' +
-            '<a class="action-link" href="' + APP_URL + '?page=report&candidateId=' + encodeURIComponent(c.id) + '" target="_top" style="color:#6b7280;">Report</a>' +
+        var statusControls = '';
+        if (IS_ADMIN) {
+          statusControls = '<div class="inline-flex flex-wrap items-center gap-2 ml-2 align-middle">' +
+            '<select id="status-' + escHtml(c.id) + '" class="w-32 !p-2 !text-xs !rounded-full">' +
+              '<option value="Active"' + (c.status === 'Active' ? ' selected' : '') + '>Active</option>' +
+              '<option value="Hired"' + (c.status === 'Hired' ? ' selected' : '') + '>Hired</option>' +
+              '<option value="Rejected"' + (c.status === 'Rejected' ? ' selected' : '') + '>Rejected</option>' +
+            '</select>' +
+            '<button class="bg-white border border-stone200 text-textBody hover:border-textBody px-4 py-1.5 rounded-full shadow-sm transition-all text-xs inline-block" onclick="updateStatus(\'' + escHtml(c.id) + '\')">Save</button>' +
+          '</div>';
+        }
+        return '<tr class="hover:bg-stone200/30 group cursor-pointer border-b border-stone200 last:border-b-0 transition-colors">' +
+          '<td class="p-4 font-semibold text-textHeader border-r border-stone200">' + escHtml(c.name) + '</td>' +
+          '<td class="p-4 font-medium text-textBody border-r border-stone200">' + escHtml(c.position) + '</td>' +
+          '<td class="p-4 font-medium text-textBody border-r border-stone200 hidden md:table-cell">' + escHtml(c.level) + '</td>' +
+          '<td class="p-4 border-r border-stone200">' + statusBadge(c.status) + '</td>' +
+          '<td class="p-4 font-semibold space-x-2 whitespace-nowrap">' +
+            '<a class="bg-primary hover:bg-secondary text-white px-4 py-1.5 rounded-full shadow-sm transition-all text-xs inline-block" href="' + APP_URL + '?page=eval&candidateId=' + encodeURIComponent(c.id) + '" target="_top">Evaluate</a>' +
+            '<a class="bg-white border border-stone200 text-textBody hover:border-textBody px-4 py-1.5 rounded-full shadow-sm transition-all text-xs inline-block" href="' + APP_URL + '?page=report&candidateId=' + encodeURIComponent(c.id) + '" target="_top">Report</a>' +
+            statusControls +
           '</td>' +
         '</tr>';
       }).join('');
+    }
+
+    function updateStatus(candidateId) {
+      var select = document.getElementById('status-' + candidateId);
+      if (!select) return;
+      var nextStatus = select.value;
+
+      google.script.run
+        .withSuccessHandler(function() {
+          allCandidates = allCandidates.map(function(candidate) {
+            if (candidate.id === candidateId) {
+              candidate.status = nextStatus;
+            }
+            return candidate;
+          });
+          filterTable();
+          showSuccess('Candidate status updated to ' + nextStatus + '.');
+        })
+        .withFailureHandler(showError)
+        .updateStatus(candidateId, nextStatus);
     }
 
     function filterTable() {
@@ -188,8 +205,8 @@
         .getCandidates();
     }
 
-    function openAddModal() { document.getElementById('addModal').classList.add('open'); }
-    function closeAddModal() { document.getElementById('addModal').classList.remove('open'); }
+    function openAddModal() { document.getElementById('addModal').classList.remove('hidden'); }
+    function closeAddModal() { document.getElementById('addModal').classList.add('hidden'); }
 
     function submitAdd() {
       var name     = document.getElementById('inputName').value.trim();
@@ -204,12 +221,12 @@
 
     function showError(e) {
       var msg = document.getElementById('msg');
-      msg.className = 'msg error';
+      msg.className = 'mb-6 font-medium border border-red-200 p-4 shadow-sm rounded-xl block bg-red-50 text-red-700';
       msg.textContent = typeof e === 'string' ? e : (e.message || 'An error occurred.');
     }
     function showSuccess(text) {
       var msg = document.getElementById('msg');
-      msg.className = 'msg success';
+      msg.className = 'mb-6 font-medium border border-green-200 p-4 shadow-sm rounded-xl block bg-green-50 text-green-700';
       msg.textContent = text;
     }
 

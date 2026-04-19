@@ -1,48 +1,40 @@
 /**
  * Summary.js — Scoring engine for the Summary sheet.
  *
- * Summary sheet columns (0-based):
- *   0 CandidateID | 1 Name
- *   2 AvgTechnical | 3 AvgProblemSolving | 4 AvgCommunication
- *   5 AvgSystemDesign | 6 AvgCultureFit
- *   7 FinalScore | 8 Recommendation | 9 LastUpdated
+ * Supported schema columns:
+ *   CandidateID | Name | AvgTechnical | AvgLeadership | AvgStakeholder | FinalScore | Recommendation | LastUpdated
  *
- * Scoring weights (equal, all 20 %):
- *   FinalScore = mean(avgTechnical, avgProblemSolving, avgCommunication, avgSystemDesign, avgCultureFit)
- *
- * Recommendation thresholds:
- *   >= 8   → "Strong Hire"
- *   >= 6   → "Hire"
- *   < 6    → "No Hire"
+ * Legacy summary/evaluation headers are still accepted so existing spreadsheets remain readable.
  */
 
-/* global SpreadsheetApp, Utilities, Config */
+/* global SpreadsheetApp, Utilities, Config, PropertiesService */
 
 var Summary = (function () {
 
-  var SUMMARY_HEADERS = [
-    'CandidateID', 'Name',
-    'AvgTechnical', 'AvgProblemSolving', 'AvgCommunication',
-    'AvgSystemDesign', 'AvgCultureFit',
-    'FinalScore', 'Recommendation', 'LastUpdated'
-  ];
+  var SUMMARY_HEADER_ALIASES = {
+    candidateId: ['CandidateID'],
+    name: ['Name'],
+    avgTechnical: ['AvgTechnical'],
+    avgLeadership: ['AvgLeadership', 'AvgProblemSolving'],
+    avgStakeholder: ['AvgStakeholder', 'AvgCommunication'],
+    finalScore: ['FinalScore'],
+    recommendation: ['Recommendation'],
+    lastUpdated: ['LastUpdated']
+  };
 
-  var EVAL_HEADERS = [
-    'ID', 'CandidateID', 'InterviewerEmail',
-    'TechnicalSkills', 'ProblemSolving', 'Communication',
-    'SystemDesign', 'CultureFit', 'Notes', 'SubmittedAt'
-  ];
-
-  var ECOL = { CANDIDATE_ID: 1, TECHNICAL: 3, PROBLEM_SOLVING: 4, COMMUNICATION: 5, SYSTEM_DESIGN: 6, CULTURE_FIT: 7 };
-  var SCOL = { CANDIDATE_ID: 0, NAME: 1, AVG_TECHNICAL: 2, AVG_PROBLEM_SOLVING: 3, AVG_COMMUNICATION: 4, AVG_SYSTEM_DESIGN: 5, AVG_CULTURE_FIT: 6, FINAL_SCORE: 7, RECOMMENDATION: 8, LAST_UPDATED: 9 };
+  var EVAL_HEADER_ALIASES = {
+    candidateId: ['CandidateID'],
+    technical: ['Technical', 'TechnicalSkills'],
+    leadership: ['Leadership', 'ProblemSolving'],
+    stakeholder: ['Stakeholder', 'Communication']
+  };
 
   /**
    * Returns weights from Script Properties SCORE_WEIGHTS, or equal defaults.
-   * Format: "technical:30,problemSolving:25,communication:20,systemDesign:15,cultureFit:10"
-   * Values are normalised so they always sum to 1.
+   * Format: "technical:33.33,leadership:33.33,stakeholder:33.34"
    */
   function getWeights_() {
-    var defaults = { technical: 20, problemSolving: 20, communication: 20, systemDesign: 20, cultureFit: 20 };
+    var defaults = { technical: 1, leadership: 1, stakeholder: 1 };
     try {
       var raw = PropertiesService.getScriptProperties().getProperty('SCORE_WEIGHTS');
       if (!raw) return defaults;
@@ -51,8 +43,14 @@ var Summary = (function () {
         var parts = pair.trim().split(':');
         if (parts.length === 2) parsed[parts[0].trim()] = parseFloat(parts[1].trim()) || 0;
       });
-      // Only use if all 5 keys are present
-      var keys = ['technical','problemSolving','communication','systemDesign','cultureFit'];
+      if (parsed.problemSolving !== undefined && parsed.leadership === undefined) {
+        parsed.leadership = parsed.problemSolving;
+      }
+      if (parsed.communication !== undefined && parsed.stakeholder === undefined) {
+        parsed.stakeholder = parsed.communication;
+      }
+
+      var keys = ['technical', 'leadership', 'stakeholder'];
       var valid = keys.every(function(k) { return parsed[k] !== undefined; });
       if (!valid) return defaults;
 
@@ -79,6 +77,54 @@ var Summary = (function () {
     return SpreadsheetApp.openById(Config.getSheetId()).getSheetByName('Candidates');
   }
 
+  function findHeaderIndex_(headers, aliases) {
+    for (var i = 0; i < aliases.length; i++) {
+      var idx = headers.indexOf(aliases[i]);
+      if (idx !== -1) return idx;
+    }
+    return -1;
+  }
+
+  function getHeaders_(sheet) {
+    var lastColumn = sheet.getLastColumn();
+    if (lastColumn < 1) return [];
+    return sheet.getRange(1, 1, 1, lastColumn).getValues()[0].map(function (value) {
+      return String(value || '').trim();
+    });
+  }
+
+  function getEvalColumnMap_() {
+    var headers = getHeaders_(getEvalSheet_());
+    return {
+      candidateId: findHeaderIndex_(headers, EVAL_HEADER_ALIASES.candidateId),
+      technical: findHeaderIndex_(headers, EVAL_HEADER_ALIASES.technical),
+      leadership: findHeaderIndex_(headers, EVAL_HEADER_ALIASES.leadership),
+      stakeholder: findHeaderIndex_(headers, EVAL_HEADER_ALIASES.stakeholder)
+    };
+  }
+
+  function getSummaryHeaders_() {
+    return getHeaders_(getSummarySheet_());
+  }
+
+  function getCell_(row, idx) {
+    return idx >= 0 && idx < row.length ? row[idx] : '';
+  }
+
+  function buildSummaryRow_(headers, values) {
+    return headers.map(function (header) {
+      if (SUMMARY_HEADER_ALIASES.candidateId.indexOf(header) !== -1) return values.candidateId;
+      if (SUMMARY_HEADER_ALIASES.name.indexOf(header) !== -1) return values.name;
+      if (SUMMARY_HEADER_ALIASES.avgTechnical.indexOf(header) !== -1) return values.avgTechnical;
+      if (SUMMARY_HEADER_ALIASES.avgLeadership.indexOf(header) !== -1) return values.avgLeadership;
+      if (SUMMARY_HEADER_ALIASES.avgStakeholder.indexOf(header) !== -1) return values.avgStakeholder;
+      if (SUMMARY_HEADER_ALIASES.finalScore.indexOf(header) !== -1) return values.finalScore;
+      if (SUMMARY_HEADER_ALIASES.recommendation.indexOf(header) !== -1) return values.recommendation;
+      if (SUMMARY_HEADER_ALIASES.lastUpdated.indexOf(header) !== -1) return values.lastUpdated;
+      return '';
+    });
+  }
+
   function avg_(numbers) {
     if (!numbers.length) return 0;
     var sum = numbers.reduce(function (a, b) { return a + b; }, 0);
@@ -98,8 +144,9 @@ var Summary = (function () {
     var lastRow = evalSheet.getLastRow();
     if (lastRow < 2) return null;
 
-    var rows = evalSheet.getRange(2, 1, lastRow - 1, EVAL_HEADERS.length).getValues();
-    var relevant = rows.filter(function (r) { return String(r[ECOL.CANDIDATE_ID]) === candidateId; });
+    var cols = getEvalColumnMap_();
+    var rows = evalSheet.getRange(2, 1, lastRow - 1, evalSheet.getLastColumn()).getValues();
+    var relevant = rows.filter(function (r) { return String(getCell_(r, cols.candidateId)) === candidateId; });
 
     if (!relevant.length) return null;
 
@@ -107,34 +154,28 @@ var Summary = (function () {
       return relevant.map(function (r) { return Number(r[idx]); });
     }
 
-    var avgTechnical      = avg_(col_(ECOL.TECHNICAL));
-    var avgProblemSolving = avg_(col_(ECOL.PROBLEM_SOLVING));
-    var avgCommunication  = avg_(col_(ECOL.COMMUNICATION));
-    var avgSystemDesign   = avg_(col_(ECOL.SYSTEM_DESIGN));
-    var avgCultureFit     = avg_(col_(ECOL.CULTURE_FIT));
+    var avgTechnical   = avg_(col_(cols.technical));
+    var avgLeadership  = avg_(col_(cols.leadership));
+    var avgStakeholder = avg_(col_(cols.stakeholder));
 
     // Weighted final score
     var w = getWeights_();
-    var total = w.technical + w.problemSolving + w.communication + w.systemDesign + w.cultureFit;
+    var total = w.technical + w.leadership + w.stakeholder;
     if (!isFinite(total) || total <= 0) {
-      w = { technical: 20, problemSolving: 20, communication: 20, systemDesign: 20, cultureFit: 20 };
-      total = 100;
+      w = { technical: 1, leadership: 1, stakeholder: 1 };
+      total = 3;
     }
     var finalScore = Math.round((
-      (avgTechnical      * w.technical      +
-       avgProblemSolving * w.problemSolving  +
-       avgCommunication  * w.communication   +
-       avgSystemDesign   * w.systemDesign    +
-       avgCultureFit     * w.cultureFit) / total
+      (avgTechnical   * w.technical +
+       avgLeadership  * w.leadership +
+       avgStakeholder * w.stakeholder) / total
     ) * 100) / 100;
 
     return {
-      avgTechnical:      avgTechnical,
-      avgProblemSolving: avgProblemSolving,
-      avgCommunication:  avgCommunication,
-      avgSystemDesign:   avgSystemDesign,
-      avgCultureFit:     avgCultureFit,
-      finalScore:        finalScore
+      avgTechnical: avgTechnical,
+      avgLeadership: avgLeadership,
+      avgStakeholder: avgStakeholder,
+      finalScore: finalScore
     };
   }
 
@@ -172,28 +213,27 @@ var Summary = (function () {
     }
 
     var now = Utilities.formatDate(new Date(), 'UTC', 'yyyy-MM-dd HH:mm:ss');
-    var newRow = [
-      candidateId,
-      candidateName,
-      scores.avgTechnical,
-      scores.avgProblemSolving,
-      scores.avgCommunication,
-      scores.avgSystemDesign,
-      scores.avgCultureFit,
-      scores.finalScore,
-      getRecommendation(scores.finalScore),
-      now
-    ];
-
     var summarySheet = getSummarySheet_();
+    var headers = getSummaryHeaders_();
+    var newRow = buildSummaryRow_(headers, {
+      candidateId: candidateId,
+      name: candidateName,
+      avgTechnical: scores.avgTechnical,
+      avgLeadership: scores.avgLeadership,
+      avgStakeholder: scores.avgStakeholder,
+      finalScore: scores.finalScore,
+      recommendation: getRecommendation(scores.finalScore),
+      lastUpdated: now
+    });
     var lastRow = summarySheet.getLastRow();
 
     // Check for an existing row to update
     if (lastRow >= 2) {
-      var existingRows = summarySheet.getRange(2, 1, lastRow - 1, SUMMARY_HEADERS.length).getValues();
+      var existingRows = summarySheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
+      var candidateIdIdx = findHeaderIndex_(headers, SUMMARY_HEADER_ALIASES.candidateId);
       for (var i = 0; i < existingRows.length; i++) {
-        if (String(existingRows[i][SCOL.CANDIDATE_ID]) === candidateId) {
-          summarySheet.getRange(i + 2, 1, 1, SUMMARY_HEADERS.length).setValues([newRow]);
+        if (String(existingRows[i][candidateIdIdx]) === candidateId) {
+          summarySheet.getRange(i + 2, 1, 1, headers.length).setValues([newRow]);
           return;
         }
       }
