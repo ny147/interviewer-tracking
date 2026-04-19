@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Interviewer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f5f7fa; color: #1a1a2e; }
+    header { background: #2563eb; color: #fff; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-size: 1.25rem; }
+    header nav a { color: #bfdbfe; text-decoration: none; margin-left: 1rem; font-size: 0.9rem; }
+    header nav a:hover { color: #fff; }
+    .user-menu { display: flex; align-items: center; gap: 0.75rem; margin-left: 1.5rem; }
+    .user-email { font-size: 0.82rem; color: #bfdbfe; }
+    .btn-signout { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 0.3rem 0.75rem; border-radius: 6px; font-size: 0.8rem; cursor: pointer; text-decoration: none; }
+    .btn-signout:hover { background: rgba(255,255,255,0.25); }
+    .container { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+    /* Tabs */
+    .tabs { display: flex; gap: 0; border-bottom: 2px solid #e2e8f0; margin-bottom: 1.5rem; }
+    .tab-btn { background: none; border: none; padding: 0.65rem 1.25rem; cursor: pointer; font-size: 0.9rem; color: #64748b; border-bottom: 2px solid transparent; margin-bottom: -2px; font-weight: 500; }
+    .tab-btn:hover { color: #2563eb; }
+    .tab-btn.active { color: #2563eb; border-bottom-color: #2563eb; font-weight: 600; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    /* Toolbar */
+    .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .toolbar h2 { font-size: 1rem; font-weight: 600; color: #374151; }
+    button.primary { background: #2563eb; color: #fff; border: none; padding: 0.5rem 1.1rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: 600; }
+    button.primary:hover { background: #1d4ed8; }
+    button.secondary { background: #e5e7eb; color: #374151; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem; }
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.1); font-size: 0.875rem; }
+    th, td { padding: 0.7rem 1rem; text-align: left; }
+    th { background: #f1f5f9; font-weight: 600; color: #475569; }
+    tr:not(:last-child) td { border-bottom: 1px solid #e2e8f0; }
+    tr:hover td { background: #f8fafc; }
+    .badge { display: inline-block; padding: 0.2rem 0.55rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-active   { background: #dcfce7; color: #15803d; }
+    .badge-inactive { background: #f3f4f6; color: #6b7280; }
+    .action-link { color: #2563eb; text-decoration: none; font-size: 0.85rem; cursor: pointer; }
+    .action-link.danger { color: #b91c1c; }
+    .action-link:hover { text-decoration: underline; }
+    /* Messages */
+    .msg { padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem; display: none; }
+    .msg.error   { background: #fee2e2; color: #b91c1c; display: block; }
+    .msg.success { background: #dcfce7; color: #15803d; display: block; }
+    /* Modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 100; justify-content: center; align-items: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #fff; border-radius: 10px; padding: 2rem; width: 100%; max-width: 440px; }
+    .modal h3 { margin-bottom: 1.25rem; font-size: 1rem; }
+    .field { margin-bottom: 1rem; }
+    .field label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; color: #374151; }
+    .field input { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem; }
+    .field input:focus { outline: none; border-color: #2563eb; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem; }
+    /* Score Weights */
+    .weights-form { background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.1); padding: 1.5rem; }
+    .weight-row { display: flex; align-items: center; gap: 1rem; padding: 0.65rem 0; border-bottom: 1px solid #f1f5f9; }
+    .weight-row:last-of-type { border-bottom: none; }
+    .weight-label { flex: 1; font-size: 0.9rem; font-weight: 500; }
+    .weight-input { width: 80px; padding: 0.4rem 0.6rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem; text-align: right; }
+    .weight-input:focus { outline: none; border-color: #2563eb; }
+    .weight-pct { color: #64748b; font-size: 0.85rem; }
+    .weights-note { font-size: 0.82rem; color: #64748b; margin-top: 1rem; }
+    .weights-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem; }
+    /* Audit Log */
+    .audit-table td { vertical-align: top; }
+    .audit-action { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; background: #f1f5f9; color: #374151; }
+    .audit-action.CANDIDATE_CREATED { background: #dcfce7; color: #15803d; }
+    .audit-action.EVAL_SUBMITTED    { background: #dbeafe; color: #1d4ed8; }
+    .audit-action.EVAL_UPDATED      { background: #fef9c3; color: #854d0e; }
+    .audit-action.STATUS_CHANGED    { background: #f3e8ff; color: #7e22ce; }
+    .audit-action.WEIGHTS_UPDATED   { background: #ffedd5; color: #9a3412; }
+    .audit-detail { color: #6b7280; font-size: 0.82rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    @media (max-width: 640px) {
+      .tabs { overflow-x: auto; }
+      .tab-btn { white-space: nowrap; }
+      th, td { padding: 0.55rem 0.6rem; font-size: 0.8rem; }
+      .weight-row { flex-wrap: wrap; }
+      .weights-actions, .modal-actions { flex-direction: column; }
+      .weights-actions button, .modal-actions button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Interviewer</h1>
+    <nav>
+      <a href="<?= webAppUrl ?>?page=candidates" target="_top">Candidates</a>
+      <a href="<?= webAppUrl ?>?page=summary" target="_top">Summary</a>
+      <a href="<?= webAppUrl ?>?page=admin" target="_top">Admin</a>
+      <div class="user-menu">
+        <span class="user-email"><?= userEmail ?></span>
+        <a class="btn-signout" href="https://accounts.google.com/Logout" target="_top">Sign Out</a>
+      </div>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div id="msg" class="msg"></div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('interviewers', this)">Interviewers</button>
+      <button class="tab-btn" onclick="switchTab('weights', this)">Score Weights</button>
+      <button class="tab-btn" onclick="switchTab('auditlog', this)">Audit Log</button>
+    </div>
+
+    <!-- ── Tab 1: Interviewers ─────────────────────────────────────────── -->
+    <div class="tab-panel active" id="tab-interviewers">
+      <div class="toolbar">
+        <h2>Interviewers</h2>
+        <button class="primary" onclick="openAddModal()">+ Add Interviewer</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="interviewersTbody">
+          <tr><td colspan="5" style="text-align:center;color:#94a3b8;">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── Tab 2: Score Weights ────────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-weights">
+      <div class="toolbar"><h2>Score Weights</h2></div>
+      <div class="weights-form">
+        <div class="weight-row">
+          <span class="weight-label">Technical Skills</span>
+          <input class="weight-input" type="number" id="w-technical" min="0" max="100" step="1" value="20">
+          <span class="weight-pct">%</span>
+        </div>
+        <div class="weight-row">
+          <span class="weight-label">Problem Solving</span>
+          <input class="weight-input" type="number" id="w-problemSolving" min="0" max="100" step="1" value="20">
+          <span class="weight-pct">%</span>
+        </div>
+        <div class="weight-row">
+          <span class="weight-label">Communication</span>
+          <input class="weight-input" type="number" id="w-communication" min="0" max="100" step="1" value="20">
+          <span class="weight-pct">%</span>
+        </div>
+        <div class="weight-row">
+          <span class="weight-label">System Design</span>
+          <input class="weight-input" type="number" id="w-systemDesign" min="0" max="100" step="1" value="20">
+          <span class="weight-pct">%</span>
+        </div>
+        <div class="weight-row">
+          <span class="weight-label">Culture Fit</span>
+          <input class="weight-input" type="number" id="w-cultureFit" min="0" max="100" step="1" value="20">
+          <span class="weight-pct">%</span>
+        </div>
+        <p class="weights-note">Values are relative weights — they don't need to sum to 100. The final score is a weighted average of all five categories.</p>
+        <div class="weights-actions">
+          <button class="secondary" onclick="resetWeights()">Reset to Equal</button>
+          <button class="primary" onclick="saveWeights()">Save Weights</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Tab 3: Audit Log ────────────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-auditlog">
+      <div class="toolbar">
+        <h2>Audit Log</h2>
+        <button class="secondary" onclick="loadAuditLog()">↻ Refresh</button>
+      </div>
+      <table class="audit-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>User</th>
+            <th>Action</th>
+            <th>Entity</th>
+            <th>Detail</th>
+          </tr>
+        </thead>
+        <tbody id="auditTbody">
+          <tr><td colspan="5" style="text-align:center;color:#94a3b8;">Select the Audit Log tab to load entries.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Add Interviewer Modal -->
+  <div class="modal-overlay" id="addModal">
+    <div class="modal">
+      <h3>Add Interviewer</h3>
+      <div class="field">
+        <label>Email *</label>
+        <input type="email" id="inputEmail" placeholder="interviewer@example.com">
+      </div>
+      <div class="field">
+        <label>Full Name *</label>
+        <input type="text" id="inputName" placeholder="Jane Doe">
+      </div>
+      <div class="field">
+        <label>Role</label>
+        <input type="text" id="inputRole" placeholder="Senior Engineer">
+      </div>
+      <div class="modal-actions">
+        <button class="secondary" onclick="closeAddModal()">Cancel</button>
+        <button class="primary" onclick="submitAdd()">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var auditLoaded = false;
+    var weightsLoaded = false;
+
+    function escHtml(s) { var d = document.createElement('div'); d.textContent = String(s || ''); return d.innerHTML; }
+
+    // ── Tabs ──────────────────────────────────────────────────────────────────
+    function switchTab(name, btn) {
+      document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+      document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+      document.getElementById('tab-' + name).classList.add('active');
+      btn.classList.add('active');
+      if (name === 'weights' && !weightsLoaded) { loadWeights(); }
+      if (name === 'auditlog' && !auditLoaded)  { loadAuditLog(); }
+    }
+
+    // ── Interviewers ──────────────────────────────────────────────────────────
+    function loadInterviewers() {
+      google.script.run
+        .withSuccessHandler(function(list) {
+          var tbody = document.getElementById('interviewersTbody');
+          if (!list.length) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#94a3b8;">No interviewers yet.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = list.map(function(iv) {
+            var active = String(iv.active).toUpperCase() === 'TRUE';
+            var badgeCls = active ? 'badge-active' : 'badge-inactive';
+            var badgeText = active ? 'Active' : 'Inactive';
+            var toggleLabel = active ? 'Deactivate' : 'Activate';
+            var toggleCls = active ? 'action-link danger' : 'action-link';
+            return '<tr>' +
+              '<td>' + escHtml(iv.email) + '</td>' +
+              '<td>' + escHtml(iv.name) + '</td>' +
+              '<td>' + escHtml(iv.role) + '</td>' +
+              '<td><span class="badge ' + badgeCls + '">' + badgeText + '</span></td>' +
+              '<td><a class="' + toggleCls + '" onclick="toggleInterviewer(' + escHtml(JSON.stringify(iv.email)) + ',' + active + ')">' + toggleLabel + '</a></td>' +
+            '</tr>';
+          }).join('');
+        })
+        .withFailureHandler(showError)
+        .getInterviewers();
+    }
+
+    function toggleInterviewer(email, currentlyActive) {
+      google.script.run
+        .withSuccessHandler(function() {
+          showSuccess('Interviewer ' + (currentlyActive ? 'deactivated' : 'activated') + '.');
+          loadInterviewers();
+        })
+        .withFailureHandler(showError)
+        .toggleInterviewer(email, !currentlyActive);
+    }
+
+    function openAddModal() { document.getElementById('addModal').classList.add('open'); }
+    function closeAddModal() {
+      document.getElementById('addModal').classList.remove('open');
+      document.getElementById('inputEmail').value = '';
+      document.getElementById('inputName').value  = '';
+      document.getElementById('inputRole').value  = '';
+    }
+
+    function submitAdd() {
+      var email = document.getElementById('inputEmail').value.trim();
+      var name  = document.getElementById('inputName').value.trim();
+      var role  = document.getElementById('inputRole').value.trim();
+      if (!email) { showError('Email is required.'); return; }
+      if (!name)  { showError('Name is required.'); return; }
+      google.script.run
+        .withSuccessHandler(function() { closeAddModal(); loadInterviewers(); showSuccess('Interviewer added.'); })
+        .withFailureHandler(showError)
+        .addInterviewer({ email: email, name: name, role: role });
+    }
+
+    // ── Score Weights ─────────────────────────────────────────────────────────
+    function loadWeights() {
+      google.script.run
+        .withSuccessHandler(function(w) {
+          weightsLoaded = true;
+          document.getElementById('w-technical').value      = w.technical;
+          document.getElementById('w-problemSolving').value = w.problemSolving;
+          document.getElementById('w-communication').value  = w.communication;
+          document.getElementById('w-systemDesign').value   = w.systemDesign;
+          document.getElementById('w-cultureFit').value     = w.cultureFit;
+        })
+        .withFailureHandler(showError)
+        .getScoreWeights();
+    }
+
+    function resetWeights() {
+      ['technical', 'problemSolving', 'communication', 'systemDesign', 'cultureFit'].forEach(function(k) {
+        document.getElementById('w-' + k).value = 20;
+      });
+    }
+
+    function saveWeights() {
+      var weights = {
+        technical:      Number(document.getElementById('w-technical').value),
+        problemSolving: Number(document.getElementById('w-problemSolving').value),
+        communication:  Number(document.getElementById('w-communication').value),
+        systemDesign:   Number(document.getElementById('w-systemDesign').value),
+        cultureFit:     Number(document.getElementById('w-cultureFit').value)
+      };
+      var keys = Object.keys(weights);
+      for (var i = 0; i < keys.length; i++) {
+        if (isNaN(weights[keys[i]]) || weights[keys[i]] < 0 || weights[keys[i]] > 100) {
+          showError('All weights must be numbers between 0 and 100.');
+          return;
+        }
+      }
+      google.script.run
+        .withSuccessHandler(function() { showSuccess('Score weights saved.'); })
+        .withFailureHandler(showError)
+        .saveScoreWeights(weights);
+    }
+
+    // ── Audit Log ─────────────────────────────────────────────────────────────
+    function loadAuditLog() {
+      document.getElementById('auditTbody').innerHTML =
+        '<tr><td colspan="5" style="text-align:center;color:#94a3b8;">Loading…</td></tr>';
+      google.script.run
+        .withSuccessHandler(function(logs) {
+          auditLoaded = true;
+          var tbody = document.getElementById('auditTbody');
+          if (!logs.length) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#94a3b8;">No audit entries yet.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = logs.map(function(entry) {
+            var actionCls = 'audit-action ' + entry.action.replace(/[^A-Z_]/g, '');
+            return '<tr>' +
+              '<td style="white-space:nowrap;font-size:.8rem;">' + escHtml((entry.timestamp || '').substring(0, 19)) + '</td>' +
+              '<td style="font-size:.82rem;">' + escHtml(entry.userEmail) + '</td>' +
+              '<td><span class="' + escHtml(actionCls) + '">' + escHtml(entry.action) + '</span></td>' +
+              '<td style="font-size:.82rem;">' + escHtml(entry.entityType) + (entry.entityId ? '<br><span style="color:#94a3b8;font-size:.75rem;">' + escHtml(entry.entityId.substring(0, 18)) + '</span>' : '') + '</td>' +
+              '<td class="audit-detail" title="' + escHtml(entry.detail) + '">' + escHtml(entry.detail) + '</td>' +
+            '</tr>';
+          }).join('');
+        })
+        .withFailureHandler(showError)
+        .getAuditLogs();
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function showError(e) {
+      var msg = document.getElementById('msg');
+      msg.className = 'msg error';
+      msg.textContent = typeof e === 'string' ? e : (e.message || 'An error occurred.');
+      setTimeout(function() { msg.className = 'msg'; }, 6000);
+    }
+    function showSuccess(text) {
+      var msg = document.getElementById('msg');
+      msg.className = 'msg success';
+      msg.textContent = text;
+      setTimeout(function() { msg.className = 'msg'; }, 4000);
+    }
+
+    loadInterviewers();
+  </script>
+</body>
+</html>

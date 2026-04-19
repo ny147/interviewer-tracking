@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Candidate Report — Interviewer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f5f7fa; color: #1a1a2e; }
+    header { background: #2563eb; color: #fff; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-size: 1.25rem; }
+    header nav a { color: #bfdbfe; text-decoration: none; margin-left: 1rem; font-size: 0.9rem; }
+    header nav a:hover { color: #fff; }
+    .user-menu { display: flex; align-items: center; gap: 0.75rem; margin-left: 1.5rem; }
+    .user-email { font-size: 0.82rem; color: #bfdbfe; }
+    .btn-signout { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 0.3rem 0.75rem; border-radius: 6px; font-size: 0.8rem; cursor: pointer; text-decoration: none; transition: background 0.15s; }
+    .btn-signout:hover { background: rgba(255,255,255,0.25); }
+    .container { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+    .back { display: inline-block; color: #2563eb; text-decoration: none; font-size: 0.85rem; margin-bottom: 1rem; }
+    .back:hover { text-decoration: underline; }
+    .card { background: #fff; border-radius: 10px; padding: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,.1); margin-bottom: 1.5rem; }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
+    .card-header h2 { font-size: 1.3rem; }
+    .meta { font-size: 0.85rem; color: #64748b; margin-top: 0.25rem; }
+    .badge { display: inline-block; padding: 0.3rem 0.8rem; border-radius: 9999px; font-size: 0.85rem; font-weight: 700; }
+    .strong-hire { background: #dcfce7; color: #15803d; }
+    .hire        { background: #dbeafe; color: #1d4ed8; }
+    .no-hire     { background: #fee2e2; color: #b91c1c; }
+    .scores-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .score-card { text-align: center; padding: 1rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; }
+    .score-card .label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.35rem; }
+    .score-card .value { font-size: 1.75rem; font-weight: 700; color: #1a1a2e; }
+    .score-card.final { border-color: #2563eb; background: #eff6ff; }
+    .score-card.final .value { color: #2563eb; }
+    h3 { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #374151; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    th, td { padding: 0.65rem 0.75rem; text-align: left; }
+    th { background: #f1f5f9; font-weight: 600; color: #475569; }
+    tr:not(:last-child) td { border-bottom: 1px solid #e2e8f0; }
+    .notes-cell { color: #6b7280; font-style: italic; max-width: 220px; }
+    .toolbar { display: flex; justify-content: flex-end; gap: 0.75rem; margin-bottom: 1.25rem; }
+    button.print-btn { background: #2563eb; color: #fff; border: none; padding: 0.5rem 1.1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+    button.print-btn:hover { background: #1d4ed8; }
+    button.csv-btn { background: #059669; color: #fff; border: none; padding: 0.5rem 1.1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+    button.csv-btn:hover { background: #047857; }
+    .loading { text-align: center; color: #94a3b8; padding: 3rem; }
+
+    @media (max-width: 600px) {
+      .scores-grid { grid-template-columns: repeat(2, 1fr); }
+      .card-header { flex-direction: column; gap: 0.75rem; }
+      .toolbar { flex-direction: column; }
+      .toolbar button { width: 100%; }
+      table { font-size: 0.8rem; }
+      th, td { padding: 0.5rem; }
+    }
+
+    @media print {
+      header, .back, .toolbar { display: none !important; }
+      body { background: #fff; }
+      .card { box-shadow: none; border: 1px solid #e2e8f0; page-break-inside: avoid; }
+      .container { max-width: 100%; margin: 0; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Interviewer</h1>
+    <nav>
+      <a href="<?= webAppUrl ?>?page=candidates" target="_top">Candidates</a>
+      <a href="<?= webAppUrl ?>?page=summary" target="_top">Summary</a>
+      <? if (isAdmin) { ?><a href="<?= webAppUrl ?>?page=admin" target="_top">Admin</a><? } ?>
+      <div class="user-menu">
+        <span class="user-email"><?= userEmail ?></span>
+        <a class="btn-signout" href="https://accounts.google.com/Logout" target="_top">Sign Out</a>
+      </div>
+    </nav>
+  </header>
+
+  <div class="container">
+    <a class="back" href="<?= webAppUrl ?>?page=summary" target="_top">← Back to Summary</a>
+
+    <div class="toolbar">
+      <button class="csv-btn" onclick="exportCSV()">Export CSV</button>
+      <button class="print-btn" onclick="window.print()">Print / Save PDF</button>
+    </div>
+
+    <div id="reportContent">
+      <div class="loading">Loading report…</div>
+    </div>
+  </div>
+
+  <script>
+    var candidateId = '<?= candidateId ?>';
+    var APP_URL     = '<?= webAppUrl ?>';
+    var reportData  = { candidate: null, evaluations: [], summary: null };
+
+    function escHtml(s) { var d = document.createElement('div'); d.textContent = String(s || ''); return d.innerHTML; }
+    function fmt(v) { return (v !== undefined && v !== null && v !== '' && !isNaN(v)) ? Number(v).toFixed(1) : '—'; }
+
+    function recBadge(rec) {
+      if (!rec) return '';
+      var cls = rec === 'Strong Hire' ? 'strong-hire' : rec === 'Hire' ? 'hire' : 'no-hire';
+      return '<span class="badge ' + cls + '">' + escHtml(rec) + '</span>';
+    }
+
+    function renderReport() {
+      var c = reportData.candidate;
+      var evals = reportData.evaluations;
+      var scores = reportData.summary;
+
+      if (!c) {
+        document.getElementById('reportContent').innerHTML = '<div class="loading">Candidate not found.</div>';
+        return;
+      }
+
+      var rec = scores ? (scores.finalScore >= 8 ? 'Strong Hire' : scores.finalScore >= 6 ? 'Hire' : 'No Hire') : '';
+
+      var html = '';
+
+      // Candidate info + recommendation
+      html += '<div class="card">';
+      html += '<div class="card-header">';
+      html += '<div><h2>' + escHtml(c.name) + '</h2>';
+      html += '<div class="meta">' + escHtml(c.position) + (c.level ? ' · ' + escHtml(c.level) : '') + '</div>';
+      html += '<div class="meta">Status: ' + escHtml(c.status) + '</div></div>';
+      if (rec) html += recBadge(rec);
+      html += '</div>';
+
+      // Aggregated score cards
+      if (scores) {
+        html += '<div class="scores-grid">';
+        html += scoreCard('Technical', scores.avgTechnical);
+        html += scoreCard('Problem Solving', scores.avgProblemSolving);
+        html += scoreCard('Communication', scores.avgCommunication);
+        html += scoreCard('System Design', scores.avgSystemDesign);
+        html += scoreCard('Culture Fit', scores.avgCultureFit);
+        html += '<div class="score-card final"><div class="label">Final Score</div><div class="value">' + fmt(scores.finalScore) + '</div></div>';
+        html += '</div>';
+      }
+      html += '</div>'; // end card
+
+      // Individual evaluations
+      html += '<div class="card">';
+      html += '<h3>Individual Evaluations (' + evals.length + ')</h3>';
+      if (!evals.length) {
+        html += '<p style="color:#94a3b8;font-size:.9rem;">No evaluations submitted yet.</p>';
+      } else {
+        html += '<table><thead><tr>';
+        html += '<th>Interviewer</th><th>Technical</th><th>Problem Solving</th><th>Communication</th><th>System Design</th><th>Culture Fit</th><th>Notes</th><th>Date</th>';
+        html += '</tr></thead><tbody>';
+        evals.forEach(function(ev) {
+          html += '<tr>';
+          html += '<td>' + escHtml(ev.interviewerEmail) + '</td>';
+          html += '<td>' + ev.scores.technicalSkills + '</td>';
+          html += '<td>' + ev.scores.problemSolving + '</td>';
+          html += '<td>' + ev.scores.communication + '</td>';
+          html += '<td>' + ev.scores.systemDesign + '</td>';
+          html += '<td>' + ev.scores.cultureFit + '</td>';
+          html += '<td class="notes-cell">' + escHtml(ev.notes || '—') + '</td>';
+          html += '<td>' + escHtml((ev.submittedAt || '').substring(0, 10)) + '</td>';
+          html += '</tr>';
+        });
+        html += '</tbody></table>';
+      }
+      html += '</div>';
+
+      document.getElementById('reportContent').innerHTML = html;
+    }
+
+    function scoreCard(label, val) {
+      return '<div class="score-card"><div class="label">' + escHtml(label) + '</div><div class="value">' + fmt(val) + '</div></div>';
+    }
+
+    function exportCSV() {
+      if (!reportData.evaluations.length) return;
+      var headers = ['Interviewer', 'Technical', 'Problem Solving', 'Communication', 'System Design', 'Culture Fit', 'Notes', 'Date'];
+      var rows = reportData.evaluations.map(function(ev) {
+        return [
+          ev.interviewerEmail,
+          ev.scores.technicalSkills, ev.scores.problemSolving, ev.scores.communication,
+          ev.scores.systemDesign, ev.scores.cultureFit,
+          ev.notes || '', (ev.submittedAt || '').substring(0, 10)
+        ].map(function(v) { return '"' + String(v === null || v === undefined ? '' : v).replace(/"/g, '""') + '"'; }).join(',');
+      });
+      var csv = [headers.join(',')].concat(rows).join('\n');
+      var blob = new Blob([csv], { type: 'text/csv' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      var name = reportData.candidate ? reportData.candidate.name.replace(/[^a-z0-9]/gi, '-').toLowerCase() : 'candidate';
+      a.href = url; a.download = name + '-report.csv'; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // Load candidate and evaluations in parallel via sequential calls
+    var loaded = 0;
+    function checkAllLoaded() {
+      loaded++;
+      if (loaded >= 2) renderReport();
+    }
+
+    google.script.run
+      .withSuccessHandler(function(c) { reportData.candidate = c; checkAllLoaded(); })
+      .withFailureHandler(function() { checkAllLoaded(); })
+      .getCandidateDetail(candidateId);
+
+    google.script.run
+      .withSuccessHandler(function(evals) {
+        reportData.evaluations = evals || [];
+        // compute summary from evaluations client-side
+        if (evals && evals.length) {
+          function avgOf(field) {
+            var sum = 0;
+            evals.forEach(function(e) { sum += e.scores[field]; });
+            return Math.round(sum / evals.length * 100) / 100;
+          }
+          var avgT = avgOf('technicalSkills');
+          var avgP = avgOf('problemSolving');
+          var avgC = avgOf('communication');
+          var avgS = avgOf('systemDesign');
+          var avgF = avgOf('cultureFit');
+          reportData.summary = {
+            avgTechnical: avgT, avgProblemSolving: avgP, avgCommunication: avgC,
+            avgSystemDesign: avgS, avgCultureFit: avgF,
+            finalScore: Math.round((avgT + avgP + avgC + avgS + avgF) / 5 * 100) / 100
+          };
+        }
+        checkAllLoaded();
+      })
+      .withFailureHandler(function() { checkAllLoaded(); })
+      .getEvaluations(candidateId);
+  </script>
+</body>
+</html>

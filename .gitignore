@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Credentials — never commit real values
+.env
+.clasp.json
+
+# Auto-generated bootstrap file (contains real credential values)
+src/_SetupProperties.js
+
+# Build output
+dist/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json

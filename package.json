@@ -1,0 +1,25 @@
+{
+  "name": "interviewer",
+  "version": "1.0.0",
+  "description": "Candidate Evaluation System — Google Apps Script + Google Sheets",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test tests/**/*.test.js",
+    "test:watch": "node --test --watch tests/**/*.test.js",
+    "setup:clasp": "node scripts/setup-clasp.js",
+    "set-properties": "node scripts/set-properties.js",
+    "clean-properties": "node scripts/clean-properties.js",
+    "push": "clasp push",
+    "setup:schema": "clasp push && echo 'Now run setupSchema from the Apps Script editor'",
+    "deploy": "clasp deploy",
+    "deploy:all": "clasp push && clasp deploy",
+    "watch": "clasp push --watch"
+  },
+  "devDependencies": {
+    "@google/clasp": "^2.4.2",
+    "dotenv": "^16.4.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

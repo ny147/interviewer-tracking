@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Evaluate — Interviewer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f5f7fa; color: #1a1a2e; }
+    header { background: #2563eb; color: #fff; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-size: 1.25rem; }
+    header nav a { color: #bfdbfe; text-decoration: none; margin-left: 1rem; font-size: 0.9rem; }
+    .user-menu { display: flex; align-items: center; gap: 0.75rem; margin-left: 1.5rem; }
+    .user-email { font-size: 0.82rem; color: #bfdbfe; }
+    .btn-signout { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 0.3rem 0.75rem; border-radius: 6px; font-size: 0.8rem; cursor: pointer; text-decoration: none; transition: background 0.15s; }
+    .btn-signout:hover { background: rgba(255,255,255,0.25); }
+    .container { max-width: 620px; margin: 2rem auto; padding: 0 1rem; }
+    .card { background: #fff; border-radius: 10px; padding: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+    h2 { font-size: 1.1rem; margin-bottom: 1.5rem; }
+    .field { margin-bottom: 1.25rem; }
+    .field label { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; color: #374151; }
+    .field label span { font-weight: 400; color: #6b7280; }
+    input[type=range] { width: 100%; accent-color: #2563eb; }
+    .score-display { text-align: right; font-weight: 700; color: #2563eb; font-size: 1rem; }
+    textarea { width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem; min-height: 90px; resize: vertical; }
+    button.primary { width: 100%; background: #2563eb; color: #fff; border: none; padding: 0.75rem; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600; margin-top: 1rem; }
+    button.primary:hover { background: #1d4ed8; }
+    .msg { padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.9rem; display: none; }
+    .msg.error   { background: #fee2e2; color: #b91c1c; display: block; }
+    .msg.success { background: #dcfce7; color: #15803d; display: block; }
+    .msg.info    { background: #dbeafe; color: #1e40af; display: block; }
+    .back { display: inline-block; color: #2563eb; text-decoration: none; font-size: 0.85rem; margin-bottom: 1rem; }
+    .back:hover { text-decoration: underline; }
+    @media (max-width: 600px) {
+      .container { margin: 1rem auto; }
+      .card { padding: 1.25rem; }
+      header nav { display: none; }
+      .user-menu { margin-left: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Interviewer</h1>
+    <nav>
+      <a href="<?= webAppUrl ?>?page=candidates" target="_top">Candidates</a>
+      <a href="<?= webAppUrl ?>?page=summary" target="_top">Summary</a>
+      <? if (isAdmin) { ?><a href="<?= webAppUrl ?>?page=admin" target="_top">Admin</a><? } ?>
+      <div class="user-menu">
+        <span class="user-email"><?= userEmail ?></span>
+        <a class="btn-signout" href="https://accounts.google.com/Logout" target="_top">Sign Out</a>
+      </div>
+    </nav>
+  </header>
+
+  <div class="container">
+    <a class="back" href="<?= webAppUrl ?>?page=candidates" target="_top">← Back to Candidates</a>
+
+    <div class="card">
+      <h2>Evaluation Form</h2>
+      <div id="msg" class="msg"></div>
+
+      <form id="evalForm" onsubmit="submitForm(event)">
+
+        <div class="field">
+          <label>Technical Skills <span id="val-technical">5</span></label>
+          <input type="range" id="technical" name="technical" min="1" max="10" value="5"
+                 oninput="document.getElementById('val-technical').textContent=this.value">
+        </div>
+
+        <div class="field">
+          <label>Problem Solving <span id="val-problemSolving">5</span></label>
+          <input type="range" id="problemSolving" name="problemSolving" min="1" max="10" value="5"
+                 oninput="document.getElementById('val-problemSolving').textContent=this.value">
+        </div>
+
+        <div class="field">
+          <label>Communication <span id="val-communication">5</span></label>
+          <input type="range" id="communication" name="communication" min="1" max="10" value="5"
+                 oninput="document.getElementById('val-communication').textContent=this.value">
+        </div>
+
+        <div class="field">
+          <label>System Design <span id="val-systemDesign">5</span></label>
+          <input type="range" id="systemDesign" name="systemDesign" min="1" max="10" value="5"
+                 oninput="document.getElementById('val-systemDesign').textContent=this.value">
+        </div>
+
+        <div class="field">
+          <label>Culture Fit <span id="val-cultureFit">5</span></label>
+          <input type="range" id="cultureFit" name="cultureFit" min="1" max="10" value="5"
+                 oninput="document.getElementById('val-cultureFit').textContent=this.value">
+        </div>
+
+        <div class="field">
+          <label>Notes</label>
+          <textarea id="notes" placeholder="Optional observations, questions asked, red flags…"></textarea>
+        </div>
+
+        <button type="submit" class="primary" id="submitBtn">Submit Evaluation</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    var candidateId = '<?= candidateId ?>';
+    var APP_URL     = '<?= webAppUrl ?>';
+    var existingEvalId = null;
+
+    // Try to load existing evaluation for this user
+    google.script.run
+      .withSuccessHandler(function(eval_) {
+        if (!eval_) return; // no prior eval — stay in submit mode
+        existingEvalId = eval_.id;
+        // Pre-fill sliders
+        var map = {
+          technical:      eval_.scores.technicalSkills,
+          problemSolving: eval_.scores.problemSolving,
+          communication:  eval_.scores.communication,
+          systemDesign:   eval_.scores.systemDesign,
+          cultureFit:     eval_.scores.cultureFit
+        };
+        Object.keys(map).forEach(function(key) {
+          var el = document.getElementById(key);
+          if (el && map[key]) {
+            el.value = map[key];
+            var label = document.getElementById('val-' + key);
+            if (label) label.textContent = map[key];
+          }
+        });
+        if (eval_.notes) document.getElementById('notes').value = eval_.notes;
+        // Switch button to Update
+        var btn = document.getElementById('submitBtn');
+        btn.textContent = 'Update Evaluation';
+        btn.style.background = '#0891b2';
+        // Show info banner
+        var msg = document.getElementById('msg');
+        msg.className = 'msg info';
+        msg.textContent = 'You have already evaluated this candidate. You can update your scores below.';
+      })
+      .withFailureHandler(function() {}) // silently ignore — will be submit mode
+      .getMyEvaluation(candidateId);
+
+    function submitForm(e) {
+      e.preventDefault();
+      var btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = existingEvalId ? 'Updating…' : 'Submitting…';
+
+      var scores = {
+        technicalSkills: parseInt(document.getElementById('technical').value),
+        problemSolving:  parseInt(document.getElementById('problemSolving').value),
+        communication:   parseInt(document.getElementById('communication').value),
+        systemDesign:    parseInt(document.getElementById('systemDesign').value),
+        cultureFit:      parseInt(document.getElementById('cultureFit').value)
+      };
+      var notes = document.getElementById('notes').value.trim();
+
+      function onSuccess() {
+        showSuccess((existingEvalId ? 'Evaluation updated' : 'Evaluation submitted') + '! Redirecting…');
+        setTimeout(function() {
+          window.top.location.href = APP_URL + '?page=candidates';
+        }, 1500);
+      }
+      function onFailure(err) {
+        btn.disabled = false;
+        btn.textContent = existingEvalId ? 'Update Evaluation' : 'Submit Evaluation';
+        showError(err);
+      }
+
+      if (existingEvalId) {
+        google.script.run
+          .withSuccessHandler(onSuccess)
+          .withFailureHandler(onFailure)
+          .updateEval(existingEvalId, { candidateId: candidateId, scores: scores, notes: notes });
+      } else {
+        google.script.run
+          .withSuccessHandler(onSuccess)
+          .withFailureHandler(onFailure)
+          .submitEval({ candidateId: candidateId, scores: scores, notes: notes });
+      }
+    }
+
+    function showError(e) {
+      var msg = document.getElementById('msg');
+      msg.className = 'msg error';
+      msg.textContent = typeof e === 'string' ? e : (e.message || 'An error occurred.');
+    }
+    function showSuccess(text) {
+      var msg = document.getElementById('msg');
+      msg.className = 'msg success';
+      msg.textContent = text;
+    }
+  </script>
+</body>
+</html>
