@@ -115,12 +115,10 @@
 
       // Aggregated score cards
       if (scores) {
-        html += '<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">';
+        html += '<div class="grid grid-cols-2 md:grid-cols-4 gap-4">';
         html += scoreCard('Tech', scores.avgTechnical);
-        html += scoreCard('Problem', scores.avgProblemSolving);
-        html += scoreCard('Comm', scores.avgCommunication);
-        html += scoreCard('System', scores.avgSystemDesign);
-        html += scoreCard('Culture', scores.avgCultureFit);
+        html += scoreCard('Leadership', scores.avgLeadership);
+        html += scoreCard('Stakeholder', scores.avgStakeholder);
         html += '<div class="border border-stone200 p-4 bg-primary/10 shadow-sm flex flex-col justify-center items-center text-center rounded-xl"><div class="font-display font-medium tracking-wide text-xs tracking-widest mb-1 text-textHeader">Final</div><div class="font-semibold text-3xl text-textHeader">' + fmt(scores.finalScore) + '</div></div>';
         html += '</div>';
       }
@@ -135,21 +133,17 @@
         html += '<div class="overflow-x-auto"><table class="w-full text-left border-collapse" ><thead><tr class="bg-base border-b border-stone200">';
         html += '<th class="p-4 font-display font-medium tracking-wide text-textHeader border-r border-stone200">Interviewer</th>';
         html += '<th class="p-4 font-display font-medium tracking-wide text-textHeader border-r border-stone200">Tech</th>';
-        html += '<th class="p-4 font-display font-medium tracking-wide text-textHeader border-r border-stone200">Prob</th>';
-        html += '<th class="p-4 font-display font-medium tracking-wide text-textHeader border-r border-stone200">Comm</th>';
-        html += '<th class="p-4 font-display font-medium tracking-wide text-textHeader border-r border-stone200">Sys</th>';
-        html += '<th class="p-4 font-display font-medium tracking-wide text-textHeader border-r border-stone200">Cult</th>';
+        html += '<th class="p-4 font-display font-medium tracking-wide text-textHeader border-r border-stone200">Leadership</th>';
+        html += '<th class="p-4 font-display font-medium tracking-wide text-textHeader border-r border-stone200">Stakeholder</th>';
         html += '<th class="p-4 font-display font-medium tracking-wide text-textHeader border-r border-stone200">Notes</th>';
         html += '<th class="p-4 font-display font-medium tracking-wide text-textHeader">Date</th>';
         html += '</tr></thead><tbody>';
         evals.forEach(function(ev) {
           html += '<tr class="hover:bg-stone200/30 font-medium border-b border-stone200 last:border-b-0 group transition-colors">';
           html += '<td class="p-4 border-r border-stone200 font-semibold">' + escHtml(ev.interviewerEmail) + '</td>';
-          html += '<td class="p-4 border-r border-stone200 text-center text-lg">' + ev.scores.technicalSkills + '</td>';
-          html += '<td class="p-4 border-r border-stone200 text-center text-lg">' + ev.scores.problemSolving + '</td>';
-          html += '<td class="p-4 border-r border-stone200 text-center text-lg">' + ev.scores.communication + '</td>';
-          html += '<td class="p-4 border-r border-stone200 text-center text-lg">' + ev.scores.systemDesign + '</td>';
-          html += '<td class="p-4 border-r border-stone200 text-center text-lg">' + ev.scores.cultureFit + '</td>';
+          html += '<td class="p-4 border-r border-stone200 text-center text-lg">' + ev.scores.technical + '</td>';
+          html += '<td class="p-4 border-r border-stone200 text-center text-lg">' + ev.scores.leadership + '</td>';
+          html += '<td class="p-4 border-r border-stone200 text-center text-lg">' + ev.scores.stakeholder + '</td>';
           html += '<td class="p-4 border-r border-stone200 text-sm max-w-[250px] italic">' + escHtml(ev.notes || '—') + '</td>';
           html += '<td class="p-4 whitespace-nowrap">' + escHtml((ev.submittedAt || '').substring(0, 10)) + '</td>';
           html += '</tr>';
@@ -167,12 +161,11 @@
 
     function exportCSV() {
       if (!reportData.evaluations.length) return;
-      var headers = ['Interviewer', 'Technical', 'Problem Solving', 'Communication', 'System Design', 'Culture Fit', 'Notes', 'Date'];
+      var headers = ['Interviewer', 'Technical', 'Leadership', 'Stakeholder', 'Notes', 'Date'];
       var rows = reportData.evaluations.map(function(ev) {
         return [
           ev.interviewerEmail,
-          ev.scores.technicalSkills, ev.scores.problemSolving, ev.scores.communication,
-          ev.scores.systemDesign, ev.scores.cultureFit,
+          ev.scores.technical, ev.scores.leadership, ev.scores.stakeholder,
           ev.notes || '', (ev.submittedAt || '').substring(0, 10)
         ].map(function(v) { return '"' + String(v === null || v === undefined ? '' : v).replace(/"/g, '""') + '"'; }).join(',');
       });
@@ -207,15 +200,14 @@
             evals.forEach(function(e) { sum += e.scores[field]; });
             return Math.round(sum / evals.length * 100) / 100;
           }
-          var avgT = avgOf('technicalSkills');
-          var avgP = avgOf('problemSolving');
-          var avgC = avgOf('communication');
-          var avgS = avgOf('systemDesign');
-          var avgF = avgOf('cultureFit');
+          var avgT = avgOf('technical');
+          var avgL = avgOf('leadership');
+          var avgS = avgOf('stakeholder');
           reportData.summary = {
-            avgTechnical: avgT, avgProblemSolving: avgP, avgCommunication: avgC,
-            avgSystemDesign: avgS, avgCultureFit: avgF,
-            finalScore: Math.round((avgT + avgP + avgC + avgS + avgF) / 5 * 100) / 100
+            avgTechnical: avgT,
+            avgLeadership: avgL,
+            avgStakeholder: avgS,
+            finalScore: Math.round((avgT + avgL + avgS) / 3 * 100) / 100
           };
         }
         checkAllLoaded();

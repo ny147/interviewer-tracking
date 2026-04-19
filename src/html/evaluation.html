@@ -62,28 +62,18 @@
       <form id="evalForm" onsubmit="submitForm(event)">
 
         <div class="mb-8 p-4 bg-stone200/20 border border-stone200 shadow-sm rounded-xl flex flex-col hover:bg-stone200/40 transition-colors">
-          <label class="flex justify-between font-display font-medium tracking-wide text-lg text-textHeader mb-2">Technical Skills <span id="val-technical" class="text-white bg-primary font-bold px-3 py-0.5 rounded-full shadow-sm">5</span></label>
+          <label class="flex justify-between font-display font-medium tracking-wide text-lg text-textHeader mb-2">Technical <span id="val-technical" class="text-white bg-primary font-bold px-3 py-0.5 rounded-full shadow-sm">5</span></label>
           <input type="range" id="technical" name="technical" min="1" max="10" value="5" class="w-full accent-primary h-2 bg-stone200 rounded-full outline-none" oninput="document.getElementById('val-technical').textContent=this.value">
         </div>
 
         <div class="mb-8 p-4 bg-stone200/20 border border-stone200 shadow-sm rounded-xl flex flex-col hover:bg-stone200/40 transition-colors">
-          <label class="flex justify-between font-display font-medium tracking-wide text-lg text-textHeader mb-2">Problem Solving <span id="val-problemSolving" class="text-white bg-primary font-bold px-3 py-0.5 rounded-full shadow-sm">5</span></label>
-          <input type="range" id="problemSolving" name="problemSolving" min="1" max="10" value="5" class="w-full accent-primary h-2 bg-stone200 rounded-full outline-none" oninput="document.getElementById('val-problemSolving').textContent=this.value">
+          <label class="flex justify-between font-display font-medium tracking-wide text-lg text-textHeader mb-2">Leadership <span id="val-leadership" class="text-white bg-primary font-bold px-3 py-0.5 rounded-full shadow-sm">5</span></label>
+          <input type="range" id="leadership" name="leadership" min="1" max="10" value="5" class="w-full accent-primary h-2 bg-stone200 rounded-full outline-none" oninput="document.getElementById('val-leadership').textContent=this.value">
         </div>
 
         <div class="mb-8 p-4 bg-stone200/20 border border-stone200 shadow-sm rounded-xl flex flex-col hover:bg-stone200/40 transition-colors">
-          <label class="flex justify-between font-display font-medium tracking-wide text-lg text-textHeader mb-2">Communication <span id="val-communication" class="text-white bg-primary font-bold px-3 py-0.5 rounded-full shadow-sm">5</span></label>
-          <input type="range" id="communication" name="communication" min="1" max="10" value="5" class="w-full accent-primary h-2 bg-stone200 rounded-full outline-none" oninput="document.getElementById('val-communication').textContent=this.value">
-        </div>
-
-        <div class="mb-8 p-4 bg-stone200/20 border border-stone200 shadow-sm rounded-xl flex flex-col hover:bg-stone200/40 transition-colors">
-          <label class="flex justify-between font-display font-medium tracking-wide text-lg text-textHeader mb-2">System Design <span id="val-systemDesign" class="text-white bg-primary font-bold px-3 py-0.5 rounded-full shadow-sm">5</span></label>
-          <input type="range" id="systemDesign" name="systemDesign" min="1" max="10" value="5" class="w-full accent-primary h-2 bg-stone200 rounded-full outline-none" oninput="document.getElementById('val-systemDesign').textContent=this.value">
-        </div>
-
-        <div class="mb-8 p-4 bg-stone200/20 border border-stone200 shadow-sm rounded-xl flex flex-col hover:bg-stone200/40 transition-colors">
-          <label class="flex justify-between font-display font-medium tracking-wide text-lg text-textHeader mb-2">Culture Fit <span id="val-cultureFit" class="text-white bg-primary font-bold px-3 py-0.5 rounded-full shadow-sm">5</span></label>
-          <input type="range" id="cultureFit" name="cultureFit" min="1" max="10" value="5" class="w-full accent-primary h-2 bg-stone200 rounded-full outline-none" oninput="document.getElementById('val-cultureFit').textContent=this.value">
+          <label class="flex justify-between font-display font-medium tracking-wide text-lg text-textHeader mb-2">Stakeholder <span id="val-stakeholder" class="text-white bg-primary font-bold px-3 py-0.5 rounded-full shadow-sm">5</span></label>
+          <input type="range" id="stakeholder" name="stakeholder" min="1" max="10" value="5" class="w-full accent-primary h-2 bg-stone200 rounded-full outline-none" oninput="document.getElementById('val-stakeholder').textContent=this.value">
         </div>
 
         <div class="mb-8">
@@ -101,6 +91,10 @@
     var APP_URL     = '<?= webAppUrl ?>';
     var existingEvalId = null;
 
+    function goToCandidates() {
+      window.open(APP_URL + '?page=candidates', '_top');
+    }
+
     // Try to load existing evaluation for this user
     google.script.run
       .withSuccessHandler(function(eval_) {
@@ -108,11 +102,9 @@
         existingEvalId = eval_.id;
         // Pre-fill sliders
         var map = {
-          technical:      eval_.scores.technicalSkills,
-          problemSolving: eval_.scores.problemSolving,
-          communication:  eval_.scores.communication,
-          systemDesign:   eval_.scores.systemDesign,
-          cultureFit:     eval_.scores.cultureFit
+          technical:   eval_.scores.technical,
+          leadership:  eval_.scores.leadership,
+          stakeholder: eval_.scores.stakeholder
         };
         Object.keys(map).forEach(function(key) {
           var el = document.getElementById(key);
@@ -142,19 +134,17 @@
       btn.textContent = existingEvalId ? 'Updating…' : 'Submitting…';
 
       var scores = {
-        technicalSkills: parseInt(document.getElementById('technical').value),
-        problemSolving:  parseInt(document.getElementById('problemSolving').value),
-        communication:   parseInt(document.getElementById('communication').value),
-        systemDesign:    parseInt(document.getElementById('systemDesign').value),
-        cultureFit:      parseInt(document.getElementById('cultureFit').value)
+        technical: parseInt(document.getElementById('technical').value, 10),
+        leadership: parseInt(document.getElementById('leadership').value, 10),
+        stakeholder: parseInt(document.getElementById('stakeholder').value, 10)
       };
       var notes = document.getElementById('notes').value.trim();
 
       function onSuccess() {
         showSuccess((existingEvalId ? 'Evaluation updated' : 'Evaluation submitted') + '! Redirecting…');
         setTimeout(function() {
-          window.top.location.href = APP_URL + '?page=candidates';
-        }, 1500);
+          goToCandidates();
+        }, 900);
       }
       function onFailure(err) {
         btn.disabled = false;

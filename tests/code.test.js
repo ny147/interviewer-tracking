@@ -2,22 +2,24 @@
 
 const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
 const path = require('path');
 const { buildSandbox, loadFile } = require('./helpers/apps-script-harness.cjs');
 
 const SRC = path.resolve(__dirname, '../src');
 
-function buildCodeSandbox(overrides) {
+function buildCodeSandbox(overrides, options) {
+  options = options || {};
   const { sandbox } = buildSandbox({
-    scriptProperties: { GOOGLE_SHEET_ID: 'test-id', ADMIN_EMAILS: 'admin@example.com' },
-    userEmail: 'admin@example.com',
-    sheetData: {
+    scriptProperties: Object.assign({ GOOGLE_SHEET_ID: 'test-id', ADMIN_EMAILS: 'admin@example.com' }, options.scriptProperties || {}),
+    userEmail: options.userEmail || 'admin@example.com',
+    sheetData: Object.assign({
       Candidates: [['ID', 'Name', 'Position', 'Level', 'Status', 'CreatedAt', 'CreatedBy']],
       Interviewers: [['Email', 'Name', 'Role', 'Active']],
-      Evaluations: [['ID', 'CandidateID', 'InterviewerEmail', 'TechnicalSkills', 'ProblemSolving', 'Communication', 'SystemDesign', 'CultureFit', 'Notes', 'SubmittedAt']],
-      Summary: [['CandidateID', 'Name', 'AvgTechnical', 'AvgProblemSolving', 'AvgCommunication', 'AvgSystemDesign', 'AvgCultureFit', 'FinalScore', 'Recommendation', 'LastUpdated']],
+      Evaluations: [['ID', 'CandidateID', 'InterviewerEmail', 'Technical', 'Leadership', 'Stakeholder', 'Notes', 'SubmittedAt']],
+      Summary: [['CandidateID', 'Name', 'AvgTechnical', 'AvgLeadership', 'AvgStakeholder', 'FinalScore', 'Recommendation', 'LastUpdated']],
       AuditLog: [['Timestamp', 'UserEmail', 'Action', 'EntityType', 'EntityID', 'Detail']]
-    }
+    }, options.sheetData || {})
   });
 
   sandbox.ScriptApp = {
@@ -32,7 +34,7 @@ function buildCodeSandbox(overrides) {
   sandbox.HtmlService = {
     XFrameOptionsMode: { ALLOWALL: 'ALLOWALL' },
     createTemplateFromFile: function () {
-      return {
+      var template = {
         evaluate: function () {
           return {
             setTitle: function () { return this; },
@@ -40,6 +42,8 @@ function buildCodeSandbox(overrides) {
           };
         }
       };
+      sandbox.__lastTemplate = template;
+      return template;
     },
     createHtmlOutput: function (html) {
       return {
@@ -92,11 +96,9 @@ describe('Code — updateEval', () => {
 
     sandbox.updateEval('ev1', {
       scores: {
-        technicalSkills: 8,
-        problemSolving: 8,
-        communication: 8,
-        systemDesign: 8,
-        cultureFit: 8
+        technical: 8,
+        leadership: 8,
+        stakeholder: 8
       },
       notes: 'Updated'
     });
@@ -107,6 +109,14 @@ describe('Code — updateEval', () => {
 });
 
 describe('Code — doGet', () => {
+  it('strips any existing query string from the web app url used by templates', () => {
+    const sandbox = buildCodeSandbox();
+
+    sandbox.doGet({ parameter: { page: 'candidates' } });
+
+    assert.equal(sandbox.__lastTemplate.webAppUrl, 'https://example.test/app');
+  });
+
   it('escapes generic error content before rendering HTML', () => {
     const sandbox = buildCodeSandbox({
       Auth: {
@@ -141,5 +151,108 @@ describe('Code — doGet', () => {
 
     assert.match(result.content, /bad@example\.com&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
     assert.doesNotMatch(result.content, /bad@example\.com<script>alert\(1\)<\/script>/);
+  });
+});
+
+describe('Code — admin access management', () => {
+  it('adds admin emails to script properties when an admin interviewer is created', () => {
+    const sandbox = buildCodeSandbox();
+
+    sandbox.addInterviewer({ email: 'manager@example.com', name: 'Manager', role: 'Admin' });
+
+    const adminEmails = sandbox.PropertiesService.getScriptProperties().getProperty('ADMIN_EMAILS');
+    assert.match(adminEmails, /manager@example.com/);
+  });
+
+  it('removes admin emails from script properties when an admin interviewer is deactivated', () => {
+    const sandbox = buildCodeSandbox({}, {
+      sheetData: {
+        Interviewers: [
+          ['Email', 'Name', 'Role', 'Active'],
+          ['admin@example.com', 'Primary Admin', 'Admin', 'TRUE'],
+          ['manager@example.com', 'Manager', 'Admin', 'TRUE']
+        ]
+      },
+      scriptProperties: {
+        ADMIN_EMAILS: 'admin@example.com,manager@example.com'
+      }
+    });
+
+    sandbox.toggleInterviewer('manager@example.com', false);
+
+    const adminEmails = sandbox.PropertiesService.getScriptProperties().getProperty('ADMIN_EMAILS');
+    assert.equal(adminEmails, 'admin@example.com');
+  });
+});
+
+describe('Code — updateStatus', () => {
+  it('delegates candidate status updates and writes an audit log entry', () => {
+    var updatedCandidateId = null;
+    var updatedStatus = null;
+    var auditArgs = null;
+    const sandbox = buildCodeSandbox({
+      Candidates: {
+        updateCandidateStatus: function (candidateId, status) {
+          updatedCandidateId = candidateId;
+          updatedStatus = status;
+        }
+      },
+      AuditLog: {
+        logEvent: function () {
+          auditArgs = Array.prototype.slice.call(arguments);
+        }
+      }
+    });
+
+    const result = sandbox.updateStatus('c1', 'Hired');
+
+    assert.equal(updatedCandidateId, 'c1');
+    assert.equal(updatedStatus, 'Hired');
+    assert.equal(result.ok, true);
+    assert.deepEqual(auditArgs, ['admin@example.com', 'STATUS_CHANGED', 'Candidate', 'c1', 'Hired']);
+  });
+});
+
+describe('HTML regressions', () => {
+  it('uses a top-level window open fallback when evaluation save succeeds', () => {
+    const html = fs.readFileSync(path.join(SRC, 'html', 'evaluation.html'), 'utf8');
+
+    assert.match(html, /window\.open\(APP_URL \+ '\?page=candidates', '_top'\)/);
+  });
+
+  it('shows only technical, leadership, and stakeholder inputs on the evaluation page', () => {
+    const html = fs.readFileSync(path.join(SRC, 'html', 'evaluation.html'), 'utf8');
+
+    assert.match(html, /Technical/);
+    assert.match(html, /Leadership/);
+    assert.match(html, /Stakeholder/);
+    assert.doesNotMatch(html, /Problem Solving/);
+    assert.doesNotMatch(html, /System Design/);
+    assert.doesNotMatch(html, /Culture Fit/);
+  });
+
+  it('renders a client-side status update control on the candidates page', () => {
+    const html = fs.readFileSync(path.join(SRC, 'html', 'candidates.html'), 'utf8');
+
+    assert.match(html, /updateStatus\(/);
+    assert.match(html, /google\.script\.run[\s\S]*\.updateStatus\(/);
+  });
+
+  it('shows three score columns on the summary page', () => {
+    const html = fs.readFileSync(path.join(SRC, 'html', 'summary.html'), 'utf8');
+
+    assert.match(html, /Leadership/);
+    assert.match(html, /Stakeholder/);
+    assert.doesNotMatch(html, /avgProblemSolving/);
+    assert.doesNotMatch(html, /avgCultureFit/);
+  });
+
+  it('shows three score weights on the admin page', () => {
+    const html = fs.readFileSync(path.join(SRC, 'html', 'admin.html'), 'utf8');
+
+    assert.match(html, /w-leadership/);
+    assert.match(html, /w-stakeholder/);
+    assert.doesNotMatch(html, /w-problemSolving/);
+    assert.doesNotMatch(html, /w-cultureFit/);
   });
 });

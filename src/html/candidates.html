@@ -123,6 +123,7 @@
 
   <script>
     var APP_URL = '<?= webAppUrl ?>';
+    var IS_ADMIN = <?!= JSON.stringify(isAdmin) ?>;
     var allCandidates = [];
 
     function statusBadge(status) {
@@ -138,6 +139,17 @@
         return;
       }
       tbody.innerHTML = list.map(function(c) {
+        var statusControls = '';
+        if (IS_ADMIN) {
+          statusControls = '<div class="inline-flex flex-wrap items-center gap-2 ml-2 align-middle">' +
+            '<select id="status-' + escHtml(c.id) + '" class="w-32 !p-2 !text-xs !rounded-full">' +
+              '<option value="Active"' + (c.status === 'Active' ? ' selected' : '') + '>Active</option>' +
+              '<option value="Hired"' + (c.status === 'Hired' ? ' selected' : '') + '>Hired</option>' +
+              '<option value="Rejected"' + (c.status === 'Rejected' ? ' selected' : '') + '>Rejected</option>' +
+            '</select>' +
+            '<button class="bg-white border border-stone200 text-textBody hover:border-textBody px-4 py-1.5 rounded-full shadow-sm transition-all text-xs inline-block" onclick="updateStatus(\'' + escHtml(c.id) + '\')">Save</button>' +
+          '</div>';
+        }
         return '<tr class="hover:bg-stone200/30 group cursor-pointer border-b border-stone200 last:border-b-0 transition-colors">' +
           '<td class="p-4 font-semibold text-textHeader border-r border-stone200">' + escHtml(c.name) + '</td>' +
           '<td class="p-4 font-medium text-textBody border-r border-stone200">' + escHtml(c.position) + '</td>' +
@@ -146,9 +158,30 @@
           '<td class="p-4 font-semibold space-x-2 whitespace-nowrap">' +
             '<a class="bg-primary hover:bg-secondary text-white px-4 py-1.5 rounded-full shadow-sm transition-all text-xs inline-block" href="' + APP_URL + '?page=eval&candidateId=' + encodeURIComponent(c.id) + '" target="_top">Evaluate</a>' +
             '<a class="bg-white border border-stone200 text-textBody hover:border-textBody px-4 py-1.5 rounded-full shadow-sm transition-all text-xs inline-block" href="' + APP_URL + '?page=report&candidateId=' + encodeURIComponent(c.id) + '" target="_top">Report</a>' +
+            statusControls +
           '</td>' +
         '</tr>';
       }).join('');
+    }
+
+    function updateStatus(candidateId) {
+      var select = document.getElementById('status-' + candidateId);
+      if (!select) return;
+      var nextStatus = select.value;
+
+      google.script.run
+        .withSuccessHandler(function() {
+          allCandidates = allCandidates.map(function(candidate) {
+            if (candidate.id === candidateId) {
+              candidate.status = nextStatus;
+            }
+            return candidate;
+          });
+          filterTable();
+          showSuccess('Candidate status updated to ' + nextStatus + '.');
+        })
+        .withFailureHandler(showError)
+        .updateStatus(candidateId, nextStatus);
     }
 
     function filterTable() {

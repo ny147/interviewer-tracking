@@ -81,18 +81,12 @@
             <th onclick="sortBy('avgTechnical')"
               class="p-4 text-left font-display font-medium tracking-wide border-r border-stone200 cursor-pointer hover:bg-stone200/30 transition-colors hidden md:table-cell">
               Tech <span class="text-xs opacity-50 ml-1 inline-block" id="sort-avgTechnical">↕</span></th>
-            <th onclick="sortBy('avgProblemSolving')"
+            <th onclick="sortBy('avgLeadership')"
               class="p-4 text-left font-display font-medium tracking-wide border-r border-stone200 cursor-pointer hover:bg-stone200/30 transition-colors hidden md:table-cell">
-              Prob <span class="text-xs opacity-50 ml-1 inline-block" id="sort-avgProblemSolving">↕</span></th>
-            <th onclick="sortBy('avgCommunication')"
+              Leadership <span class="text-xs opacity-50 ml-1 inline-block" id="sort-avgLeadership">↕</span></th>
+            <th onclick="sortBy('avgStakeholder')"
               class="p-4 text-left font-display font-medium tracking-wide border-r border-stone200 cursor-pointer hover:bg-stone200/30 transition-colors hidden md:table-cell">
-              Comm <span class="text-xs opacity-50 ml-1 inline-block" id="sort-avgCommunication">↕</span></th>
-            <th onclick="sortBy('avgSystemDesign')"
-              class="p-4 text-left font-display font-medium tracking-wide border-r border-stone200 cursor-pointer hover:bg-stone200/30 transition-colors hidden md:table-cell">
-              Sys <span class="text-xs opacity-50 ml-1 inline-block" id="sort-avgSystemDesign">↕</span></th>
-            <th onclick="sortBy('avgCultureFit')"
-              class="p-4 text-left font-display font-medium tracking-wide border-r border-stone200 cursor-pointer hover:bg-stone200/30 transition-colors hidden md:table-cell">
-              Cult <span class="text-xs opacity-50 ml-1 inline-block" id="sort-avgCultureFit">↕</span></th>
+              Stakeholder <span class="text-xs opacity-50 ml-1 inline-block" id="sort-avgStakeholder">↕</span></th>
             <th onclick="sortBy('finalScore')"
               class="p-4 text-left font-display font-medium tracking-wide border-r border-stone200 cursor-pointer hover:bg-stone200/30 transition-colors bg-primary/10">
               Final <span class="text-xs opacity-50 ml-1 inline-block" id="sort-finalScore">↕</span></th>
@@ -103,7 +97,7 @@
         </thead>
         <tbody id="tbody">
           <tr>
-            <td colspan="9" class="p-8 text-center font-bold text-gray-500">Loading…</td>
+            <td colspan="7" class="p-8 text-center font-bold text-gray-500">Loading…</td>
           </tr>
         </tbody>
       </table>
@@ -125,7 +119,7 @@
     function renderTable(list) {
       var tbody = document.getElementById('tbody');
       if (!list.length) {
-        tbody.innerHTML = '<tr><td colspan="9" class="p-8 text-center font-bold text-gray-500">No data yet.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center font-bold text-gray-500">No data yet.</td></tr>';
         return;
       }
       tbody.innerHTML = list.map(function (c) {
@@ -135,10 +129,8 @@
           '<td class="p-4 border-r border-stone200 font-semibold">' + escHtml(c.name) + '</td>' +
           '<td class="p-4 border-r border-stone200">' + escHtml(c.position) + '</td>' +
           '<td class="p-4 border-r border-stone200 hidden md:table-cell tabular-nums">' + fmt(c.avgTechnical) + '</td>' +
-          '<td class="p-4 border-r border-stone200 hidden md:table-cell tabular-nums">' + fmt(c.avgProblemSolving) + '</td>' +
-          '<td class="p-4 border-r border-stone200 hidden md:table-cell tabular-nums">' + fmt(c.avgCommunication) + '</td>' +
-          '<td class="p-4 border-r border-stone200 hidden md:table-cell tabular-nums">' + fmt(c.avgSystemDesign) + '</td>' +
-          '<td class="p-4 border-r border-stone200 hidden md:table-cell tabular-nums">' + fmt(c.avgCultureFit) + '</td>' +
+          '<td class="p-4 border-r border-stone200 hidden md:table-cell tabular-nums">' + fmt(c.avgLeadership) + '</td>' +
+          '<td class="p-4 border-r border-stone200 hidden md:table-cell tabular-nums">' + fmt(c.avgStakeholder) + '</td>' +
           '<td class="p-4 border-r border-stone200 tabular-nums font-semibold text-lg bg-primary/5">' + fmt(c.finalScore) + '</td>' +
           '<td class="p-4">' + badge(rec) + '</td>' +
           '</tr>';
@@ -170,9 +162,9 @@
 
     function exportCSV() {
       if (!allData.length) return;
-      var headers = ['Name', 'Position', 'Technical', 'Problem Solving', 'Communication', 'System Design', 'Culture Fit', 'Final Score', 'Recommendation'];
+      var headers = ['Name', 'Position', 'Technical', 'Leadership', 'Stakeholder', 'Final Score', 'Recommendation'];
       var rows = allData.map(function (c) {
-        return [c.name, c.position, c.avgTechnical, c.avgProblemSolving, c.avgCommunication, c.avgSystemDesign, c.avgCultureFit, c.finalScore, c.recommendation || ''].map(function (v) {
+        return [c.name, c.position, c.avgTechnical, c.avgLeadership, c.avgStakeholder, c.finalScore, c.recommendation || ''].map(function (v) {
           return '"' + String(v === null || v === undefined ? '' : v).replace(/"/g, '""') + '"';
         }).join(',');
       });
@@ -191,7 +183,7 @@
       })
       .withFailureHandler(function (e) {
         document.getElementById('tbody').innerHTML =
-          '<tr><td colspan="9" class="p-8 text-center font-bold text-[#b91c1c]">' + escHtml(e.message || e) + '</td></tr>';
+          '<tr><td colspan="7" class="p-8 text-center font-bold text-[#b91c1c]">' + escHtml(e.message || e) + '</td></tr>';
       })
       .getSummary();
   </script>

@@ -12,13 +12,12 @@ const SRC = path.resolve(__dirname, '../src');
 
 const EVAL_HEADERS = [
   'ID', 'CandidateID', 'InterviewerEmail',
-  'TechnicalSkills', 'ProblemSolving', 'Communication',
-  'SystemDesign', 'CultureFit', 'Notes', 'SubmittedAt'
+  'Technical', 'Leadership', 'Stakeholder',
+  'Notes', 'SubmittedAt'
 ];
 const SUMMARY_HEADERS = [
   'CandidateID', 'Name',
-  'AvgTechnical', 'AvgProblemSolving', 'AvgCommunication',
-  'AvgSystemDesign', 'AvgCultureFit',
+  'AvgTechnical', 'AvgLeadership', 'AvgStakeholder',
   'FinalScore', 'Recommendation', 'LastUpdated'
 ];
 
@@ -45,17 +44,15 @@ function buildSummarySandbox(candidateRows, evalRows, summaryRows) {
 describe('Summary — computeScores', () => {
   it('returns correct category averages for a candidate with two evaluations', () => {
     const evalRows = [
-      ['ev1', 'c1', 'alice@example.com', 8, 7, 9, 8, 7, '', '2026-01-01'],
-      ['ev2', 'c1', 'bob@example.com',   6, 9, 7, 8, 9, '', '2026-01-02']
+      ['ev1', 'c1', 'alice@example.com', 8, 7, 9, '', '2026-01-01'],
+      ['ev2', 'c1', 'bob@example.com',   6, 9, 7, '', '2026-01-02']
     ];
     const sandbox = buildSummarySandbox([['c1', 'Jane', 'SDE', 'Senior', 'Active', '', '']], evalRows);
     const result = sandbox.Summary.computeScores('c1');
 
     assert.equal(result.avgTechnical, 7);       // (8+6)/2
-    assert.equal(result.avgProblemSolving, 8);  // (7+9)/2
-    assert.equal(result.avgCommunication, 8);   // (9+7)/2
-    assert.equal(result.avgSystemDesign, 8);    // (8+8)/2
-    assert.equal(result.avgCultureFit, 8);      // (7+9)/2
+    assert.equal(result.avgLeadership, 8);      // (7+9)/2
+    assert.equal(result.avgStakeholder, 8);     // (9+7)/2
   });
 
   it('returns null when no evaluations exist for candidate', () => {
@@ -69,7 +66,7 @@ describe('Summary — computeScores', () => {
       scriptProperties: {
         GOOGLE_SHEET_ID: 'test-id',
         ADMIN_EMAILS: 'admin@example.com',
-        SCORE_WEIGHTS: 'technical:0,problemSolving:0,communication:0,systemDesign:0,cultureFit:0'
+        SCORE_WEIGHTS: 'technical:0,leadership:0,stakeholder:0'
       },
       userEmail: 'admin@example.com',
       sheetData: {
@@ -79,7 +76,7 @@ describe('Summary — computeScores', () => {
         ],
         Evaluations: [
           EVAL_HEADERS,
-          ['ev1', 'c1', 'alice@example.com', 8, 6, 10, 4, 2, '', '2026-01-01']
+          ['ev1', 'c1', 'alice@example.com', 8, 6, 10, '', '2026-01-01']
         ],
         Summary: [SUMMARY_HEADERS],
         Interviewers: [['Email', 'Name', 'Role', 'Active']]
@@ -91,7 +88,7 @@ describe('Summary — computeScores', () => {
 
     const result = sandbox.Summary.computeScores('c1');
 
-    assert.equal(result.finalScore, 6);
+    assert.equal(result.finalScore, 8);
   });
 });
 
@@ -118,7 +115,7 @@ describe('Summary — getRecommendation', () => {
 describe('Summary — refreshSummary', () => {
   it('writes a summary row for a candidate with evaluations', () => {
     const evalRows = [
-      ['ev1', 'c1', 'alice@example.com', 8, 8, 8, 8, 8, '', '2026-01-01']
+      ['ev1', 'c1', 'alice@example.com', 8, 8, 8, '', '2026-01-01']
     ];
     const { sandbox, sheets } = buildSandbox({
       scriptProperties: { GOOGLE_SHEET_ID: 'test-id', ADMIN_EMAILS: 'admin@example.com' },
@@ -144,15 +141,15 @@ describe('Summary — refreshSummary', () => {
     assert.equal(rows.length, 2);
     assert.equal(rows[1][0], 'c1');
     assert.equal(rows[1][1], 'Jane');
-    assert.equal(rows[1][7], 8);     // FinalScore = 8
-    assert.equal(rows[1][8], 'Strong Hire');
+    assert.equal(rows[1][5], 8);     // FinalScore = 8
+    assert.equal(rows[1][6], 'Strong Hire');
   });
 
   it('updates an existing summary row instead of duplicating', () => {
     const evalRows = [
-      ['ev1', 'c1', 'alice@example.com', 6, 6, 6, 6, 6, '', '2026-01-01']
+      ['ev1', 'c1', 'alice@example.com', 6, 6, 6, '', '2026-01-01']
     ];
-    const existingSummaryRow = ['c1', 'Jane', 0, 0, 0, 0, 0, 0, 'No Hire', '2026-01-01'];
+    const existingSummaryRow = ['c1', 'Jane', 0, 0, 0, 0, 'No Hire', '2026-01-01'];
     const { sandbox, sheets } = buildSandbox({
       scriptProperties: { GOOGLE_SHEET_ID: 'test-id', ADMIN_EMAILS: 'admin@example.com' },
       userEmail: 'admin@example.com',
@@ -174,7 +171,7 @@ describe('Summary — refreshSummary', () => {
 
     const rows = sheets['Summary']._rows;
     assert.equal(rows.length, 2); // still only 1 data row, not 2
-    assert.equal(rows[1][7], 6);  // updated FinalScore
-    assert.equal(rows[1][8], 'Hire');
+    assert.equal(rows[1][5], 6);  // updated FinalScore
+    assert.equal(rows[1][6], 'Hire');
   });
 });

@@ -22,6 +22,38 @@ function escapeHtml_(value) {
     .replace(/'/g, '&#39;');
 }
 
+function getWebAppUrl_() {
+  return String(ScriptApp.getService().getUrl() || '').split('?')[0];
+}
+
+function getAdminEmails_() {
+  var raw = PropertiesService.getScriptProperties().getProperty('ADMIN_EMAILS') || '';
+  return raw.split(',').map(function (email) {
+    return String(email || '').toLowerCase().trim();
+  }).filter(Boolean);
+}
+
+function saveAdminEmails_(emails) {
+  var unique = [];
+  for (var i = 0; i < emails.length; i++) {
+    var email = String(emails[i] || '').toLowerCase().trim();
+    if (email && unique.indexOf(email) === -1) unique.push(email);
+  }
+  PropertiesService.getScriptProperties().setProperty('ADMIN_EMAILS', unique.join(','));
+}
+
+function syncAdminAccess_(interviewerEmail, shouldBeAdmin) {
+  var normalised = String(interviewerEmail || '').toLowerCase().trim();
+  var adminEmails = getAdminEmails_();
+  var idx = adminEmails.indexOf(normalised);
+  if (shouldBeAdmin && idx === -1) {
+    adminEmails.push(normalised);
+  } else if (!shouldBeAdmin && idx !== -1) {
+    adminEmails.splice(idx, 1);
+  }
+  saveAdminEmails_(adminEmails);
+}
+
 /**
  * Serves the web app.  Requires the user to be authorised.
  * @param {object} e  — event object from Apps Script
@@ -33,7 +65,7 @@ function doGet(e) {
 
     var page       = (e && e.parameter && e.parameter.page) || 'candidates';
     var title      = 'Interviewer';
-    var webAppUrl  = ScriptApp.getService().getUrl();
+    var webAppUrl  = getWebAppUrl_();
     var template;
 
     if (page === 'eval') {
@@ -65,7 +97,7 @@ function doGet(e) {
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 
   } catch (err) {
-    var webAppUrl = ScriptApp.getService().getUrl();
+    var webAppUrl = getWebAppUrl_();
     var isAuthError = String(err.message || '').indexOf('not authorised') !== -1;
     var safeWebAppUrl = escapeHtml_(webAppUrl);
 
@@ -262,26 +294,33 @@ function getScoreWeights() {
   var email = Auth.getCurrentUserEmail();
   if (!Auth.isAdmin(email)) throw new Error('Admin access required.');
   var raw = PropertiesService.getScriptProperties().getProperty('SCORE_WEIGHTS') || '';
-  var defaults = { technical: 20, problemSolving: 20, communication: 20, systemDesign: 20, cultureFit: 20 };
+  var defaults = { technical: 33.33, leadership: 33.33, stakeholder: 33.34 };
   if (!raw) return defaults;
   var parsed = {};
   raw.split(',').forEach(function (pair) {
     var parts = pair.trim().split(':');
     if (parts.length === 2) parsed[parts[0].trim()] = parseFloat(parts[1].trim()) || 0;
   });
-  var keys = ['technical', 'problemSolving', 'communication', 'systemDesign', 'cultureFit'];
+  if (parsed.problemSolving !== undefined && parsed.leadership === undefined) parsed.leadership = parsed.problemSolving;
+  if (parsed.communication !== undefined && parsed.stakeholder === undefined) parsed.stakeholder = parsed.communication;
+  var keys = ['technical', 'leadership', 'stakeholder'];
   var valid = keys.every(function (k) { return parsed[k] !== undefined; });
-  return valid ? parsed : defaults;
+  if (!valid) return defaults;
+  return {
+    technical: parsed.technical,
+    leadership: parsed.leadership,
+    stakeholder: parsed.stakeholder
+  };
 }
 
 /**
  * Saves configurable per-category score weights (admin only).
- * @param {{ technical, problemSolving, communication, systemDesign, cultureFit }} weights
+ * @param {{ technical, leadership, stakeholder }} weights
  */
 function saveScoreWeights(weights) {
   var email = Auth.getCurrentUserEmail();
   if (!Auth.isAdmin(email)) throw new Error('Admin access required.');
-  var keys = ['technical', 'problemSolving', 'communication', 'systemDesign', 'cultureFit'];
+  var keys = ['technical', 'leadership', 'stakeholder'];
   for (var i = 0; i < keys.length; i++) {
     var v = Number(weights[keys[i]]);
     if (isNaN(v) || v < 0 || v > 100) {
@@ -301,9 +340,12 @@ function addInterviewer(data) {
   var email = Auth.getCurrentUserEmail();
   if (!Auth.isAdmin(email)) throw new Error('Admin access required.');
   if (!data.email) throw new Error('Email is required.');
+  var interviewerEmail = data.email.trim().toLowerCase();
   var ss = SpreadsheetApp.openById(Config.getSheetId());
   var sheet = ss.getSheetByName('Interviewers');
-  sheet.appendRow([data.email.trim().toLowerCase(), data.name || '', data.role || '', 'TRUE']);
+  var role = data.role || '';
+  sheet.appendRow([interviewerEmail, data.name || '', role, 'TRUE']);
+  syncAdminAccess_(interviewerEmail, String(role).toLowerCase() === 'admin');
   return { ok: true };
 }
 
@@ -322,7 +364,8 @@ function toggleInterviewer(interviewerEmail, active) {
   var normalised = (interviewerEmail || '').toLowerCase().trim();
   for (var i = 0; i < rows.length; i++) {
     if (String(rows[i][0]).toLowerCase().trim() === normalised) {
-      sheet.getRange(i + 2, 4).setValue(active ? 'TRUE' : 'FALSE');
+      sheet.getRange(i + 2, 4, 1, 1).setValues([[active ? 'TRUE' : 'FALSE']]);
+      syncAdminAccess_(normalised, active && String(rows[i][2]).toLowerCase().trim() === 'admin');
       return { ok: true };
     }
   }

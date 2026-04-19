@@ -12,8 +12,8 @@ const SRC = path.resolve(__dirname, '../src');
 
 const EVAL_HEADERS = [
   'ID', 'CandidateID', 'InterviewerEmail',
-  'TechnicalSkills', 'ProblemSolving', 'Communication',
-  'SystemDesign', 'CultureFit', 'Notes', 'SubmittedAt'
+  'Technical', 'Leadership', 'Stakeholder',
+  'Notes', 'SubmittedAt'
 ];
 
 function buildEvalSandbox(userEmail, evalRows) {
@@ -33,8 +33,9 @@ function buildEvalSandbox(userEmail, evalRows) {
 }
 
 const VALID_SCORES = {
-  technicalSkills: 8, problemSolving: 7, communication: 9,
-  systemDesign: 8, cultureFit: 7
+  technical: 8,
+  leadership: 7,
+  stakeholder: 9
 };
 
 describe('Evaluations — submitEvaluation', () => {
@@ -50,7 +51,7 @@ describe('Evaluations — submitEvaluation', () => {
     assert.ok(ev.id);
     assert.equal(ev.candidateId, 'c1');
     assert.equal(ev.interviewerEmail, 'alice@example.com');
-    assert.equal(ev.scores.technicalSkills, 8);
+    assert.equal(ev.scores.technical, 8);
     assert.equal(ev.notes, 'Strong candidate');
     assert.ok(ev.submittedAt);
   });
@@ -61,7 +62,7 @@ describe('Evaluations — submitEvaluation', () => {
       () => sandbox.Evaluations.submitEvaluation({
         candidateId: 'c1',
         interviewerEmail: 'alice@example.com',
-        scores: { ...VALID_SCORES, technicalSkills: 11 },
+        scores: { ...VALID_SCORES, technical: 11 },
         notes: ''
       }),
       /score.*1.*10|out of range/i
@@ -74,7 +75,7 @@ describe('Evaluations — submitEvaluation', () => {
       () => sandbox.Evaluations.submitEvaluation({
         candidateId: 'c1',
         interviewerEmail: 'alice@example.com',
-        scores: { ...VALID_SCORES, cultureFit: 0 },
+        scores: { ...VALID_SCORES, stakeholder: 0 },
         notes: ''
       }),
       /score.*1.*10|out of range/i
@@ -82,7 +83,7 @@ describe('Evaluations — submitEvaluation', () => {
   });
 
   it('prevents a second evaluation by the same interviewer for the same candidate', () => {
-    const existingRow = ['ev1', 'c1', 'alice@example.com', 8, 7, 9, 8, 7, '', '2026-01-01'];
+    const existingRow = ['ev1', 'c1', 'alice@example.com', 8, 7, 9, '', '2026-01-01'];
     const sandbox = buildEvalSandbox('alice@example.com', [existingRow]);
     assert.throws(
       () => sandbox.Evaluations.submitEvaluation({
@@ -99,9 +100,9 @@ describe('Evaluations — submitEvaluation', () => {
 describe('Evaluations — getEvaluationsForCandidate', () => {
   it('returns all evaluations for a given candidate id', () => {
     const rows = [
-      ['ev1', 'c1', 'alice@example.com', 8, 7, 9, 8, 7, '', '2026-01-01'],
-      ['ev2', 'c1', 'bob@example.com',   7, 8, 7, 9, 8, '', '2026-01-02'],
-      ['ev3', 'c2', 'alice@example.com', 9, 9, 8, 8, 9, '', '2026-01-03']
+      ['ev1', 'c1', 'alice@example.com', 8, 7, 9, '', '2026-01-01'],
+      ['ev2', 'c1', 'bob@example.com',   7, 8, 7, '', '2026-01-02'],
+      ['ev3', 'c2', 'alice@example.com', 9, 9, 8, '', '2026-01-03']
     ];
     const sandbox = buildEvalSandbox('admin@example.com', rows);
     const result = sandbox.Evaluations.getEvaluationsForCandidate('c1');
@@ -118,7 +119,7 @@ describe('Evaluations — getEvaluationsForCandidate', () => {
 
 describe('Evaluations — getEvaluationByInterviewer', () => {
   it('returns the evaluation by a specific interviewer for a candidate', () => {
-    const rows = [['ev1', 'c1', 'alice@example.com', 8, 7, 9, 8, 7, 'Good', '2026-01-01']];
+    const rows = [['ev1', 'c1', 'alice@example.com', 8, 7, 9, 'Good', '2026-01-01']];
     const sandbox = buildEvalSandbox('alice@example.com', rows);
     const ev = sandbox.Evaluations.getEvaluationByInterviewer('c1', 'alice@example.com');
     assert.equal(ev.id, 'ev1');
@@ -133,19 +134,19 @@ describe('Evaluations — getEvaluationByInterviewer', () => {
 
 describe('Evaluations — updateEvaluation', () => {
   it('updates scores and notes for own evaluation', () => {
-    const rows = [['ev1', 'c1', 'alice@example.com', 8, 7, 9, 8, 7, '', '2026-01-01']];
+    const rows = [['ev1', 'c1', 'alice@example.com', 8, 7, 9, '', '2026-01-01']];
     const sandbox = buildEvalSandbox('alice@example.com', rows);
     const updated = sandbox.Evaluations.updateEvaluation('ev1', {
-      scores: { ...VALID_SCORES, technicalSkills: 10 },
+      scores: { ...VALID_SCORES, technical: 10 },
       notes: 'Updated note',
       requestingEmail: 'alice@example.com'
     });
-    assert.equal(updated.scores.technicalSkills, 10);
+    assert.equal(updated.scores.technical, 10);
     assert.equal(updated.notes, 'Updated note');
   });
 
   it('throws when trying to update another interviewer\'s evaluation', () => {
-    const rows = [['ev1', 'c1', 'alice@example.com', 8, 7, 9, 8, 7, '', '2026-01-01']];
+    const rows = [['ev1', 'c1', 'alice@example.com', 8, 7, 9, '', '2026-01-01']];
     const sandbox = buildEvalSandbox('bob@example.com', rows);
     assert.throws(
       () => sandbox.Evaluations.updateEvaluation('ev1', {

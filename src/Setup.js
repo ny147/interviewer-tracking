@@ -31,7 +31,7 @@ function setupSchema() {
       validations: [
         // column index (0-based), allowed values
         { col: 3, values: ['Junior', 'Mid', 'Senior', 'Staff', 'Principal'] },
-        { col: 4, values: ['Active', 'Hired', 'Rejected', 'On Hold'] }
+        { col: 4, values: ['Active', 'Hired', 'Rejected'] }
       ]
     },
     {
@@ -47,21 +47,20 @@ function setupSchema() {
       name: 'Evaluations',
       headers: [
         'ID', 'CandidateID', 'InterviewerEmail',
-        'TechnicalSkills', 'ProblemSolving', 'Communication',
-        'SystemDesign', 'CultureFit', 'Notes', 'SubmittedAt'
+        'Technical', 'Leadership', 'Stakeholder',
+        'Notes', 'SubmittedAt'
       ],
-      widths: [220, 220, 240, 110, 110, 110, 110, 90, 300, 160],
+      widths: [220, 220, 240, 110, 110, 110, 300, 160],
       validations: []
     },
     {
       name: 'Summary',
       headers: [
         'CandidateID', 'Name',
-        'AvgTechnical', 'AvgProblemSolving', 'AvgCommunication',
-        'AvgSystemDesign', 'AvgCultureFit',
+        'AvgTechnical', 'AvgLeadership', 'AvgStakeholder',
         'FinalScore', 'Recommendation', 'LastUpdated'
       ],
-      widths: [220, 200, 100, 130, 120, 110, 90, 90, 130, 160],
+      widths: [220, 200, 120, 120, 120, 90, 130, 160],
       validations: []
     },
     {

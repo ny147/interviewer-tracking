@@ -59,8 +59,8 @@ function buildAuditSandbox(auditRows) {
     sheetData: {
       Candidates:   [['ID', 'Name', 'Position', 'Level', 'Status', 'CreatedAt', 'CreatedBy']],
       Interviewers: [['Email', 'Name', 'Role', 'Active']],
-      Evaluations:  [['ID', 'CandidateID', 'InterviewerEmail', 'TechnicalSkills', 'ProblemSolving', 'Communication', 'SystemDesign', 'CultureFit', 'Notes', 'SubmittedAt']],
-      Summary:      [['CandidateID', 'Name', 'AvgTechnical', 'AvgProblemSolving', 'AvgCommunication', 'AvgSystemDesign', 'AvgCultureFit', 'FinalScore', 'Recommendation', 'LastUpdated']],
+      Evaluations:  [['ID', 'CandidateID', 'InterviewerEmail', 'Technical', 'Leadership', 'Stakeholder', 'Notes', 'SubmittedAt']],
+      Summary:      [['CandidateID', 'Name', 'AvgTechnical', 'AvgLeadership', 'AvgStakeholder', 'FinalScore', 'Recommendation', 'LastUpdated']],
       AuditLog:     [AUDIT_HEADERS, ...(auditRows || [])]
     }
   });
@@ -103,8 +103,8 @@ describe('AuditLog — logEvent', () => {
       sheetData: {
         Candidates:   [['ID', 'Name', 'Position', 'Level', 'Status', 'CreatedAt', 'CreatedBy']],
         Interviewers: [['Email', 'Name', 'Role', 'Active']],
-        Evaluations:  [['ID', 'CandidateID', 'InterviewerEmail', 'TechnicalSkills', 'ProblemSolving', 'Communication', 'SystemDesign', 'CultureFit', 'Notes', 'SubmittedAt']],
-        Summary:      [['CandidateID', 'Name', 'AvgTechnical', 'AvgProblemSolving', 'AvgCommunication', 'AvgSystemDesign', 'AvgCultureFit', 'FinalScore', 'Recommendation', 'LastUpdated']]
+        Evaluations:  [['ID', 'CandidateID', 'InterviewerEmail', 'Technical', 'Leadership', 'Stakeholder', 'Notes', 'SubmittedAt']],
+        Summary:      [['CandidateID', 'Name', 'AvgTechnical', 'AvgLeadership', 'AvgStakeholder', 'FinalScore', 'Recommendation', 'LastUpdated']]
       }
     });
     const spreadsheet = {

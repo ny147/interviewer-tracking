@@ -107,37 +107,23 @@
       </div>
       <div class="bg-white border border-stone200 shadow-sm p-6 rounded-2xl max-w-xl mx-auto">
         <div class="flex items-center justify-between p-4 hover:bg-stone200/20 border-b border-stone200 transition-colors">
-          <span class="font-display font-medium tracking-wide text-textHeader">Technical Skills</span>
+          <span class="font-display font-medium tracking-wide text-textHeader">Technical</span>
           <div class="flex items-center gap-2">
-            <input class="w-24 text-center font-semibold" type="number" id="w-technical" min="0" max="100" step="1" value="20">
+            <input class="w-24 text-center font-semibold" type="number" id="w-technical" min="0" max="100" step="0.01" value="33.33">
             <span class="font-semibold text-textBody/50">%</span>
           </div>
         </div>
         <div class="flex items-center justify-between p-4 hover:bg-stone200/20 border-b border-stone200 transition-colors">
-          <span class="font-display font-medium tracking-wide text-textHeader">Problem Solving</span>
+          <span class="font-display font-medium tracking-wide text-textHeader">Leadership</span>
           <div class="flex items-center gap-2">
-            <input class="w-24 text-center font-semibold" type="number" id="w-problemSolving" min="0" max="100" step="1" value="20">
-            <span class="font-semibold text-textBody/50">%</span>
-          </div>
-        </div>
-        <div class="flex items-center justify-between p-4 hover:bg-stone200/20 border-b border-stone200 transition-colors">
-          <span class="font-display font-medium tracking-wide text-textHeader">Communication</span>
-          <div class="flex items-center gap-2">
-            <input class="w-24 text-center font-semibold" type="number" id="w-communication" min="0" max="100" step="1" value="20">
-            <span class="font-semibold text-textBody/50">%</span>
-          </div>
-        </div>
-        <div class="flex items-center justify-between p-4 hover:bg-stone200/20 border-b border-stone200 transition-colors">
-          <span class="font-display font-medium tracking-wide text-textHeader">System Design</span>
-          <div class="flex items-center gap-2">
-            <input class="w-24 text-center font-semibold" type="number" id="w-systemDesign" min="0" max="100" step="1" value="20">
+            <input class="w-24 text-center font-semibold" type="number" id="w-leadership" min="0" max="100" step="0.01" value="33.33">
             <span class="font-semibold text-textBody/50">%</span>
           </div>
         </div>
         <div class="flex items-center justify-between p-4 hover:bg-stone200/20 transition-colors">
-          <span class="font-display font-medium tracking-wide text-textHeader">Culture Fit</span>
+          <span class="font-display font-medium tracking-wide text-textHeader">Stakeholder</span>
           <div class="flex items-center gap-2">
-            <input class="w-24 text-center font-semibold" type="number" id="w-cultureFit" min="0" max="100" step="1" value="20">
+            <input class="w-24 text-center font-semibold" type="number" id="w-stakeholder" min="0" max="100" step="0.01" value="33.34">
             <span class="font-semibold text-textBody/50">%</span>
           </div>
         </div>
@@ -204,6 +190,8 @@
   </div>
 
   <script>
+    var APP_URL = '<?= webAppUrl ?>';
+    var CURRENT_USER_EMAIL = '<?= userEmail ?>'.toLowerCase();
     var auditLoaded = false;
     var weightsLoaded = false;
 
@@ -237,7 +225,7 @@
               '<td class="p-4 border-r border-stone200 font-semibold text-textHeader">' + escHtml(iv.name) + '</td>' +
               '<td class="p-4 border-r border-stone200 text-textBody text-sm">' + escHtml(iv.role) + '</td>' +
               '<td class="p-4 border-r border-stone200"><span class="badge ' + badgeCls + '">' + badgeText + '</span></td>' +
-              '<td class="p-4"><button class="px-4 py-1.5 font-semibold text-xs uppercase tracking-tight rounded-full transition-all ' + toggleCls + '" onclick="toggleInterviewer(' + escHtml(JSON.stringify(iv.email)) + ',' + active + ')">' + toggleLabel + '</button></td>' +
+              '<td class="p-4"><button class="px-4 py-1.5 font-semibold text-xs uppercase tracking-tight rounded-full transition-all ' + toggleCls + '" data-email="' + escHtml(iv.email) + '" data-active="' + active + '" onclick="toggleInterviewerAction(this)">' + toggleLabel + '</button></td>' +
             '</tr>';
           }).join('');
         })
@@ -245,14 +233,25 @@
         .getInterviewers();
     }
 
+    function toggleInterviewerAction(button) {
+      toggleInterviewer(button.getAttribute('data-email'), button.getAttribute('data-active') === 'true');
+    }
+
     function toggleInterviewer(email, currentlyActive) {
+      var nextActive = !currentlyActive;
       google.script.run
         .withSuccessHandler(function() {
           showSuccess('Interviewer ' + (currentlyActive ? 'deactivated' : 'activated') + '.');
+          if (!nextActive && String(email || '').toLowerCase() === CURRENT_USER_EMAIL) {
+            setTimeout(function() {
+              window.open(APP_URL + '?page=candidates', '_top');
+            }, 800);
+            return;
+          }
           loadInterviewers();
         })
         .withFailureHandler(showError)
-        .toggleInterviewer(email, !currentlyActive);
+        .toggleInterviewer(email, nextActive);
     }
 
     function openAddModal() { document.getElementById('addModal').classList.remove('hidden'); }
@@ -279,28 +278,25 @@
         .withSuccessHandler(function(w) {
           weightsLoaded = true;
           document.getElementById('w-technical').value      = w.technical;
-          document.getElementById('w-problemSolving').value = w.problemSolving;
-          document.getElementById('w-communication').value  = w.communication;
-          document.getElementById('w-systemDesign').value   = w.systemDesign;
-          document.getElementById('w-cultureFit').value     = w.cultureFit;
+          document.getElementById('w-leadership').value     = w.leadership;
+          document.getElementById('w-stakeholder').value    = w.stakeholder;
         })
         .withFailureHandler(showError)
         .getScoreWeights();
     }
 
     function resetWeights() {
-      ['technical', 'problemSolving', 'communication', 'systemDesign', 'cultureFit'].forEach(function(k) {
-        document.getElementById('w-' + k).value = 20;
+      var defaults = { technical: 33.33, leadership: 33.33, stakeholder: 33.34 };
+      Object.keys(defaults).forEach(function(k) {
+        document.getElementById('w-' + k).value = defaults[k];
       });
     }
 
     function saveWeights() {
       var weights = {
         technical:      Number(document.getElementById('w-technical').value),
-        problemSolving: Number(document.getElementById('w-problemSolving').value),
-        communication:  Number(document.getElementById('w-communication').value),
-        systemDesign:   Number(document.getElementById('w-systemDesign').value),
-        cultureFit:     Number(document.getElementById('w-cultureFit').value)
+        leadership:     Number(document.getElementById('w-leadership').value),
+        stakeholder:    Number(document.getElementById('w-stakeholder').value)
       };
       var keys = Object.keys(weights);
       for (var i = 0; i < keys.length; i++) {
