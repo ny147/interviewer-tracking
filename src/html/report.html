@@ -4,88 +4,75 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Candidate Report — Interviewer</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; background: #f5f7fa; color: #1a1a2e; }
-    header { background: #2563eb; color: #fff; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
-    header h1 { font-size: 1.25rem; }
-    header nav a { color: #bfdbfe; text-decoration: none; margin-left: 1rem; font-size: 0.9rem; }
-    header nav a:hover { color: #fff; }
-    .user-menu { display: flex; align-items: center; gap: 0.75rem; margin-left: 1.5rem; }
-    .user-email { font-size: 0.82rem; color: #bfdbfe; }
-    .btn-signout { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 0.3rem 0.75rem; border-radius: 6px; font-size: 0.8rem; cursor: pointer; text-decoration: none; transition: background 0.15s; }
-    .btn-signout:hover { background: rgba(255,255,255,0.25); }
-    .container { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
-    .back { display: inline-block; color: #2563eb; text-decoration: none; font-size: 0.85rem; margin-bottom: 1rem; }
-    .back:hover { text-decoration: underline; }
-    .card { background: #fff; border-radius: 10px; padding: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,.1); margin-bottom: 1.5rem; }
-    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
-    .card-header h2 { font-size: 1.3rem; }
-    .meta { font-size: 0.85rem; color: #64748b; margin-top: 0.25rem; }
-    .badge { display: inline-block; padding: 0.3rem 0.8rem; border-radius: 9999px; font-size: 0.85rem; font-weight: 700; }
-    .strong-hire { background: #dcfce7; color: #15803d; }
-    .hire        { background: #dbeafe; color: #1d4ed8; }
-    .no-hire     { background: #fee2e2; color: #b91c1c; }
-    .scores-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-    .score-card { text-align: center; padding: 1rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; }
-    .score-card .label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.35rem; }
-    .score-card .value { font-size: 1.75rem; font-weight: 700; color: #1a1a2e; }
-    .score-card.final { border-color: #2563eb; background: #eff6ff; }
-    .score-card.final .value { color: #2563eb; }
-    h3 { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #374151; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-    th, td { padding: 0.65rem 0.75rem; text-align: left; }
-    th { background: #f1f5f9; font-weight: 600; color: #475569; }
-    tr:not(:last-child) td { border-bottom: 1px solid #e2e8f0; }
-    .notes-cell { color: #6b7280; font-style: italic; max-width: 220px; }
-    .toolbar { display: flex; justify-content: flex-end; gap: 0.75rem; margin-bottom: 1.25rem; }
-    button.print-btn { background: #2563eb; color: #fff; border: none; padding: 0.5rem 1.1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
-    button.print-btn:hover { background: #1d4ed8; }
-    button.csv-btn { background: #059669; color: #fff; border: none; padding: 0.5rem 1.1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
-    button.csv-btn:hover { background: #047857; }
-    .loading { text-align: center; color: #94a3b8; padding: 3rem; }
-
-    @media (max-width: 600px) {
-      .scores-grid { grid-template-columns: repeat(2, 1fr); }
-      .card-header { flex-direction: column; gap: 0.75rem; }
-      .toolbar { flex-direction: column; }
-      .toolbar button { width: 100%; }
-      table { font-size: 0.8rem; }
-      th, td { padding: 0.5rem; }
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Epilogue', 'sans-serif'], display: ['Epilogue', 'sans-serif'] },
+          colors: { 
+            base: '#FAFAF9', 
+            dark: '#0F172A', 
+            primary: '#10B981', 
+            secondary: '#34D399',
+            textBody: '#44403C',
+            textHeader: '#064E3B',
+            stone200: '#E5E7EB',
+            rebel: '#10B981'
+          }
+        }
+      }
     }
+  </script>
+  <style type="text/tailwindcss">
+    @layer base {
+      body { @apply bg-base text-textBody; }
+      h1, h2, h3, h4, th { @apply text-textHeader; }
+    }
+    .btn-primary { @apply inline-block bg-primary text-white rounded-full px-8 py-3 font-display font-medium tracking-wide shadow-md transition-all hover:scale-[1.02] active:bg-secondary whitespace-nowrap cursor-pointer; }
+    .btn-secondary { @apply inline-block bg-white text-textBody border border-stone200 rounded-full px-8 py-3 font-display font-medium tracking-wide shadow-sm transition-all hover:scale-[1.02] whitespace-nowrap cursor-pointer; }
+    .nav-btn { @apply bg-white text-textBody rounded-full px-6 py-2 font-display font-medium shadow-sm border border-stone200 transition-all hover:scale-[1.02] cursor-pointer text-sm; }
+    
+    .card { @apply bg-white shadow-sm border border-stone200 p-8 md:p-12 rounded-3xl mb-10; }
+    .badge { @apply inline-block px-4 py-2 font-display font-medium tracking-wider rounded-full shadow-sm; }
+    .strong-hire { @apply bg-primary/20 text-textHeader; }
+    .hire        { @apply bg-secondary/20 text-textHeader border border-secondary/30; }
+    .no-hire     { @apply bg-[#ff6b6b]/10 text-[#991b1b] border border-[#ff6b6b]/30; }
 
     @media print {
       header, .back, .toolbar { display: none !important; }
-      body { background: #fff; }
-      .card { box-shadow: none; border: 1px solid #e2e8f0; page-break-inside: avoid; }
-      .container { max-width: 100%; margin: 0; padding: 0; }
+      body { @apply bg-white; }
+      .card { box-shadow: none !important; border: 2px solid #E5E7EB !important; page-break-inside: avoid; }
+      .container { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Interviewer</h1>
-    <nav>
-      <a href="<?= webAppUrl ?>?page=candidates" target="_top">Candidates</a>
-      <a href="<?= webAppUrl ?>?page=summary" target="_top">Summary</a>
-      <? if (isAdmin) { ?><a href="<?= webAppUrl ?>?page=admin" target="_top">Admin</a><? } ?>
-      <div class="user-menu">
-        <span class="user-email"><?= userEmail ?></span>
-        <a class="btn-signout" href="https://accounts.google.com/Logout" target="_top">Sign Out</a>
+  <header class="bg-base/80 backdrop-blur-xl border-b border-stone200 text-textHeader p-6 md:px-10 flex justify-between items-center z-50 sticky top-0 mb-8">
+    <h1 class="font-display text-3xl font-semibold tracking-tight text-textHeader">Interviewer</h1>
+    <nav class="hidden md:flex gap-6 items-center">
+      <a href="<?= webAppUrl ?>?page=candidates" target="_top" class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all p-1">Candidates</a>
+      <a href="<?= webAppUrl ?>?page=summary" target="_top" class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all p-1">Summary</a>
+      <? if (isAdmin) { ?><a href="<?= webAppUrl ?>?page=admin" target="_top" class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all p-1">Admin</a><? } ?>
+      <div class="flex items-center gap-4 ml-4">
+        <span class="text-sm font-bold text-textBody"><?= userEmail ?></span>
+        <a class="nav-btn" href="https://accounts.google.com/Logout" target="_top">Sign Out</a>
       </div>
     </nav>
   </header>
 
-  <div class="container">
-    <a class="back" href="<?= webAppUrl ?>?page=summary" target="_top">← Back to Summary</a>
+  <div class="max-w-[1000px] mx-auto p-4 md:p-8 mt-4">
+    <a class="inline-block font-display font-medium tracking-wide tracking-tight text-dark border-none opacity-80 mb-6 hover:text-rebel hover:border-rebel transition-colors" href="<?= webAppUrl ?>?page=summary" target="_top">← Back to Summary</a>
 
-    <div class="toolbar">
-      <button class="csv-btn" onclick="exportCSV()">Export CSV</button>
-      <button class="print-btn" onclick="window.print()">Print / Save PDF</button>
+    <div class="toolbar flex flex-col sm:flex-row justify-end gap-4 mb-8">
+      <button class="btn-secondary" onclick="exportCSV()">Export CSV</button>
+      <button class="btn-primary" onclick="window.print()">Print / Save PDF</button>
     </div>
 
     <div id="reportContent">
-      <div class="loading">Loading report…</div>
+      <div class="p-12 text-center font-bold text-xl uppercase tracking-tight">Loading report…</div>
     </div>
   </div>
 
@@ -109,7 +96,7 @@
       var scores = reportData.summary;
 
       if (!c) {
-        document.getElementById('reportContent').innerHTML = '<div class="loading">Candidate not found.</div>';
+        document.getElementById('reportContent').innerHTML = '<div class="p-12 text-center font-bold text-xl uppercase tracking-tight text-[#ff6b6b]">Candidate not found.</div>';
         return;
       }
 
@@ -119,48 +106,55 @@
 
       // Candidate info + recommendation
       html += '<div class="card">';
-      html += '<div class="card-header">';
-      html += '<div><h2>' + escHtml(c.name) + '</h2>';
-      html += '<div class="meta">' + escHtml(c.position) + (c.level ? ' · ' + escHtml(c.level) : '') + '</div>';
-      html += '<div class="meta">Status: ' + escHtml(c.status) + '</div></div>';
-      if (rec) html += recBadge(rec);
+      html += '<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b border-stone200 pb-6">';
+      html += '<div><h2 class="font-display text-5xl font-semibold tracking-tight text-textHeader mb-2">' + escHtml(c.name) + '</h2>';
+      html += '<div class="font-medium text-lg text-textBody">' + escHtml(c.position) + (c.level ? ' <span class="text-stone200 mx-2">|</span> ' + escHtml(c.level) : '') + '</div>';
+      html += '<div class="font-medium text-textBody/70 mt-1 uppercase text-sm tracking-wide">Status: ' + escHtml(c.status) + '</div></div>';
+      if (rec) html += '<div>' + recBadge(rec) + '</div>';
       html += '</div>';
 
       // Aggregated score cards
       if (scores) {
-        html += '<div class="scores-grid">';
-        html += scoreCard('Technical', scores.avgTechnical);
-        html += scoreCard('Problem Solving', scores.avgProblemSolving);
-        html += scoreCard('Communication', scores.avgCommunication);
-        html += scoreCard('System Design', scores.avgSystemDesign);
-        html += scoreCard('Culture Fit', scores.avgCultureFit);
-        html += '<div class="score-card final"><div class="label">Final Score</div><div class="value">' + fmt(scores.finalScore) + '</div></div>';
+        html += '<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">';
+        html += scoreCard('Tech', scores.avgTechnical);
+        html += scoreCard('Problem', scores.avgProblemSolving);
+        html += scoreCard('Comm', scores.avgCommunication);
+        html += scoreCard('System', scores.avgSystemDesign);
+        html += scoreCard('Culture', scores.avgCultureFit);
+        html += '<div class="border border-stone200 p-4 bg-primary/10 shadow-sm flex flex-col justify-center items-center text-center rounded-xl"><div class="font-display font-medium tracking-wide text-xs tracking-widest mb-1 text-textHeader">Final</div><div class="font-semibold text-3xl text-textHeader">' + fmt(scores.finalScore) + '</div></div>';
         html += '</div>';
       }
       html += '</div>'; // end card
 
       // Individual evaluations
-      html += '<div class="card">';
-      html += '<h3>Individual Evaluations (' + evals.length + ')</h3>';
+      html += '<div class="card p-0 overflow-hidden">';
+      html += '<h3 class="font-semibold text-2xl tracking-tight p-6 border-b border-stone200 bg-stone200/20 text-textHeader">Evaluations (' + evals.length + ')</h3>';
       if (!evals.length) {
-        html += '<p style="color:#94a3b8;font-size:.9rem;">No evaluations submitted yet.</p>';
+        html += '<p class="p-8 font-medium text-textBody/60 text-center">No evaluations submitted yet.</p>';
       } else {
-        html += '<table><thead><tr>';
-        html += '<th>Interviewer</th><th>Technical</th><th>Problem Solving</th><th>Communication</th><th>System Design</th><th>Culture Fit</th><th>Notes</th><th>Date</th>';
+        html += '<div class="overflow-x-auto"><table class="w-full text-left border-collapse" ><thead><tr class="bg-base border-b border-stone200">';
+        html += '<th class="p-4 font-display font-medium tracking-wide text-textHeader border-r border-stone200">Interviewer</th>';
+        html += '<th class="p-4 font-display font-medium tracking-wide text-textHeader border-r border-stone200">Tech</th>';
+        html += '<th class="p-4 font-display font-medium tracking-wide text-textHeader border-r border-stone200">Prob</th>';
+        html += '<th class="p-4 font-display font-medium tracking-wide text-textHeader border-r border-stone200">Comm</th>';
+        html += '<th class="p-4 font-display font-medium tracking-wide text-textHeader border-r border-stone200">Sys</th>';
+        html += '<th class="p-4 font-display font-medium tracking-wide text-textHeader border-r border-stone200">Cult</th>';
+        html += '<th class="p-4 font-display font-medium tracking-wide text-textHeader border-r border-stone200">Notes</th>';
+        html += '<th class="p-4 font-display font-medium tracking-wide text-textHeader">Date</th>';
         html += '</tr></thead><tbody>';
         evals.forEach(function(ev) {
-          html += '<tr>';
-          html += '<td>' + escHtml(ev.interviewerEmail) + '</td>';
-          html += '<td>' + ev.scores.technicalSkills + '</td>';
-          html += '<td>' + ev.scores.problemSolving + '</td>';
-          html += '<td>' + ev.scores.communication + '</td>';
-          html += '<td>' + ev.scores.systemDesign + '</td>';
-          html += '<td>' + ev.scores.cultureFit + '</td>';
-          html += '<td class="notes-cell">' + escHtml(ev.notes || '—') + '</td>';
-          html += '<td>' + escHtml((ev.submittedAt || '').substring(0, 10)) + '</td>';
+          html += '<tr class="hover:bg-stone200/30 font-medium border-b border-stone200 last:border-b-0 group transition-colors">';
+          html += '<td class="p-4 border-r border-stone200 font-semibold">' + escHtml(ev.interviewerEmail) + '</td>';
+          html += '<td class="p-4 border-r border-stone200 text-center text-lg">' + ev.scores.technicalSkills + '</td>';
+          html += '<td class="p-4 border-r border-stone200 text-center text-lg">' + ev.scores.problemSolving + '</td>';
+          html += '<td class="p-4 border-r border-stone200 text-center text-lg">' + ev.scores.communication + '</td>';
+          html += '<td class="p-4 border-r border-stone200 text-center text-lg">' + ev.scores.systemDesign + '</td>';
+          html += '<td class="p-4 border-r border-stone200 text-center text-lg">' + ev.scores.cultureFit + '</td>';
+          html += '<td class="p-4 border-r border-stone200 text-sm max-w-[250px] italic">' + escHtml(ev.notes || '—') + '</td>';
+          html += '<td class="p-4 whitespace-nowrap">' + escHtml((ev.submittedAt || '').substring(0, 10)) + '</td>';
           html += '</tr>';
         });
-        html += '</tbody></table>';
+        html += '</tbody></table></div>';
       }
       html += '</div>';
 
@@ -168,7 +162,7 @@
     }
 
     function scoreCard(label, val) {
-      return '<div class="score-card"><div class="label">' + escHtml(label) + '</div><div class="value">' + fmt(val) + '</div></div>';
+      return '<div class="border border-stone200 p-4 bg-white shadow-sm flex flex-col justify-center items-center text-center rounded-xl"><div class="font-display font-medium tracking-wide text-xs tracking-widest text-textBody/70 mb-1">' + escHtml(label) + '</div><div class="font-semibold text-2xl">' + fmt(val) + '</div></div>';
     }
 
     function exportCSV() {
