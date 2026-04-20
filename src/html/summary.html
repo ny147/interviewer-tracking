@@ -8,28 +8,17 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;600&display=swap" rel="stylesheet">
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Epilogue', 'sans-serif'], display: ['Epilogue', 'sans-serif'] },
-          colors: { 
-            base: '#FAFAF9', 
-            dark: '#0F172A', 
-            primary: '#10B981', 
-            secondary: '#34D399',
-            textBody: '#44403C',
-            textHeader: '#064E3B',
-            stone200: '#E5E7EB',
-            rebel: '#10B981' // Kept for existing badge compatibility, but maps to Emerald
-          }
-        }
-      }
-    }
-  </script>
+  <?!= include('html/shared/theme-head'); ?>
   <style type="text/tailwindcss">
     @layer base {
-      body { @apply bg-base text-textBody; }
+      html { color-scheme: light; }
+      html.dark { color-scheme: dark; }
+      body {
+        @apply bg-base text-textBody;
+        min-height: 100vh;
+        transition: background-color 220ms ease, color 220ms ease;
+        background-image: radial-gradient(circle at top left, rgba(52, 211, 153, 0.2), transparent 28%), radial-gradient(circle at top right, rgba(16, 185, 129, 0.1), transparent 24%);
+      }
       h1, h2, h3, h4, th { @apply text-textHeader; }
     }
     .btn-primary { @apply inline-block bg-primary text-white rounded-full px-8 py-3 font-display font-medium tracking-wide shadow-md transition-all hover:scale-[1.02] active:bg-secondary whitespace-nowrap cursor-pointer; }
@@ -38,72 +27,142 @@
     .strong-hire { @apply bg-primary/20 text-textHeader; }
     .hire        { @apply bg-secondary/20 text-textHeader border border-secondary/30; }
     .no-hire     { @apply bg-[#ff6b6b]/10 text-[#991b1b] border border-[#ff6b6b]/30; }
+
+    .theme-toggle { backdrop-filter: blur(18px); }
+
+    html.dark body {
+      background-color: #0F172A;
+      background-image: radial-gradient(circle at top left, rgba(52, 211, 153, 0.16), transparent 24%), radial-gradient(circle at top right, rgba(16, 185, 129, 0.1), transparent 22%), linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 1));
+    }
+
+    html.dark .bg-white {
+      background-color: rgba(15, 23, 42, 0.78) !important;
+    }
+
+    html.dark .bg-base,
+    html.dark .bg-base\/70 {
+      background-color: rgba(15, 23, 42, 0.72) !important;
+    }
+
+    html.dark .bg-stone200,
+    html.dark .bg-stone200\/20,
+    html.dark .bg-stone200\/30,
+    html.dark .bg-stone200\/40,
+    html.dark .bg-stone200\/50 {
+      background-color: rgba(148, 163, 184, 0.12) !important;
+    }
+
+    html.dark .border-stone200 {
+      border-color: rgba(148, 163, 184, 0.22) !important;
+    }
+
+    html.dark .text-textBody,
+    html.dark .text-dark {
+      color: #CBD5E1 !important;
+    }
+
+    html.dark .text-textHeader {
+      color: #ECFDF5 !important;
+    }
+
+    html.dark .text-gray-500 {
+      color: rgba(148, 163, 184, 0.95) !important;
+    }
+
+    html.dark .bg-primary\/10 { background-color: rgba(16, 185, 129, 0.18) !important; }
+    html.dark .bg-primary\/20 { background-color: rgba(16, 185, 129, 0.22) !important; }
+    html.dark .bg-primary\/5 { background-color: rgba(16, 185, 129, 0.1) !important; }
+    html.dark .bg-secondary\/20 { background-color: rgba(52, 211, 153, 0.18) !important; }
+
+    html.dark .nav-btn,
+    html.dark .theme-toggle {
+      background-color: rgba(15, 23, 42, 0.84) !important;
+      color: #E2E8F0 !important;
+      border-color: rgba(148, 163, 184, 0.22) !important;
+    }
+
+    html.dark .shadow-sm,
+    html.dark .shadow-md,
+    html.dark .shadow-xl {
+      box-shadow: 0 20px 45px rgba(2, 6, 23, 0.25) !important;
+    }
+
+    html.dark .hover\:bg-stone200\/30:hover { background-color: rgba(148, 163, 184, 0.14) !important; }
+    html.dark .hover\:bg-stone200\/50:hover { background-color: rgba(148, 163, 184, 0.18) !important; }
+    html.dark .hover\:text-textHeader:hover { color: #ECFDF5 !important; }
   </style>
 </head>
 
 <body>
   <header
-    class="bg-base/80 backdrop-blur-xl border-b border-stone200 text-textHeader p-6 md:px-10 flex justify-between items-center z-50 sticky top-0 mb-8">
+    class="bg-base/70 backdrop-blur-xl border-b border-stone200 text-textHeader p-6 md:px-10 flex justify-between items-center z-50 sticky top-0 mb-12">
     <h1 class="font-display text-3xl font-semibold tracking-tight text-textHeader">Interviewer</h1>
-    <nav class="hidden md:flex gap-6 items-center">
-      <a href="<?= webAppUrl ?>?page=candidates" target="_top"
-        class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all p-1">Candidates</a>
-      <a href="<?= webAppUrl ?>?page=summary" target="_top"
-        class="font-display font-semibold tracking-wide text-primary border-b-2 border-primary p-1">Summary</a>
-      <? if (isAdmin) { ?><a href="<?= webAppUrl ?>?page=admin" target="_top"
-        class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all p-1">Admin</a>
-      <? } ?>
-      <div class="flex items-center gap-4 ml-4">
-        <span class="text-sm font-bold text-textBody">
-          <?= userEmail ?>
-        </span>
-        <a class="nav-btn" href="https://accounts.google.com/Logout" target="_top">Sign Out</a>
-      </div>
-    </nav>
+    <div class="flex items-center gap-3">
+      <button id="themeToggle" class="nav-btn theme-toggle !px-4 flex items-center gap-3" type="button" onclick="toggleTheme()" aria-label="Toggle color theme">
+        <span class="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_0_4px_rgba(16,185,129,0.16)]"></span>
+        <span id="themeToggleLabel" class="text-xs sm:text-sm">Dark mode</span>
+      </button>
+      <nav class="hidden md:flex gap-6 items-center">
+        <a href="<?= webAppUrl ?>?page=candidates" target="_top"
+          class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all p-1">Candidates</a>
+        <a href="<?= webAppUrl ?>?page=summary" target="_top"
+          class="font-display font-semibold tracking-wide text-primary border-b-2 border-primary p-1">Summary</a>
+        <? if (isAdmin) { ?><a href="<?= webAppUrl ?>?page=admin" target="_top"
+          class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all p-1">Admin</a>
+        <? } ?>
+        <div class="flex items-center gap-6 ml-4">
+          <span class="text-sm font-bold text-textBody">
+            <?= userEmail ?>
+          </span>
+          <a class="nav-btn" href="https://accounts.google.com/Logout" target="_top">Sign Out</a>
+        </div>
+      </nav>
+    </div>
   </header>
 
-  <div class="max-w-[1200px] mx-auto p-4 md:p-8 mt-4">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+  <div class="max-w-[1200px] mx-auto p-6 md:p-10 mt-4">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
       <h2 class="font-display text-4xl font-medium tracking-tight">Summary Dashboard</h2>
       <button class="btn-primary" onclick="exportCSV()">Export CSV</button>
     </div>
 
-    <div class="overflow-x-auto bg-white border border-stone200 shadow-sm rounded-3xl">
+    <div class="overflow-x-auto bg-white border border-stone200 shadow-sm rounded-[32px]">
       <table id="summaryTable" class="w-full border-collapse">
         <thead>
           <tr class="bg-base select-none border-b border-stone200">
             <th onclick="sortBy('name')"
-              class="p-4 text-left font-display font-medium tracking-wide border-r border-stone200 cursor-pointer hover:bg-stone200/30 transition-colors">
+              class="p-6 text-left font-display font-medium tracking-wide border-r border-stone200 cursor-pointer hover:bg-stone200/30 transition-colors">
               Candidate <span class="text-xs opacity-50 ml-1 inline-block" id="sort-name">↕</span></th>
             <th onclick="sortBy('position')"
-              class="p-4 text-left font-display font-medium tracking-wide border-r border-stone200 cursor-pointer hover:bg-stone200/30 transition-colors">
+              class="p-6 text-left font-display font-medium tracking-wide border-r border-stone200 cursor-pointer hover:bg-stone200/30 transition-colors">
               Position <span class="text-xs opacity-50 ml-1 inline-block" id="sort-position">↕</span></th>
             <th onclick="sortBy('avgTechnical')"
-              class="p-4 text-left font-display font-medium tracking-wide border-r border-stone200 cursor-pointer hover:bg-stone200/30 transition-colors hidden md:table-cell">
+              class="p-6 text-left font-display font-medium tracking-wide border-r border-stone200 cursor-pointer hover:bg-stone200/30 transition-colors hidden md:table-cell">
               Tech <span class="text-xs opacity-50 ml-1 inline-block" id="sort-avgTechnical">↕</span></th>
             <th onclick="sortBy('avgLeadership')"
-              class="p-4 text-left font-display font-medium tracking-wide border-r border-stone200 cursor-pointer hover:bg-stone200/30 transition-colors hidden md:table-cell">
+              class="p-6 text-left font-display font-medium tracking-wide border-r border-stone200 cursor-pointer hover:bg-stone200/30 transition-colors hidden md:table-cell">
               Leadership <span class="text-xs opacity-50 ml-1 inline-block" id="sort-avgLeadership">↕</span></th>
             <th onclick="sortBy('avgStakeholder')"
-              class="p-4 text-left font-display font-medium tracking-wide border-r border-stone200 cursor-pointer hover:bg-stone200/30 transition-colors hidden md:table-cell">
+              class="p-6 text-left font-display font-medium tracking-wide border-r border-stone200 cursor-pointer hover:bg-stone200/30 transition-colors hidden md:table-cell">
               Stakeholder <span class="text-xs opacity-50 ml-1 inline-block" id="sort-avgStakeholder">↕</span></th>
             <th onclick="sortBy('finalScore')"
-              class="p-4 text-left font-display font-medium tracking-wide border-r border-stone200 cursor-pointer hover:bg-stone200/30 transition-colors bg-primary/10">
+              class="p-6 text-left font-display font-medium tracking-wide border-r border-stone200 cursor-pointer hover:bg-stone200/30 transition-colors bg-primary/10">
               Final <span class="text-xs opacity-50 ml-1 inline-block" id="sort-finalScore">↕</span></th>
             <th onclick="sortBy('recommendation')"
-              class="p-4 text-left font-display font-medium tracking-wide cursor-pointer hover:bg-stone200/30 transition-colors">
+              class="p-6 text-left font-display font-medium tracking-wide cursor-pointer hover:bg-stone200/30 transition-colors">
               Rec <span class="text-xs opacity-50 ml-1 inline-block" id="sort-recommendation">↕</span></th>
           </tr>
         </thead>
         <tbody id="tbody">
           <tr>
-            <td colspan="7" class="p-8 text-center font-bold text-gray-500">Loading…</td>
+            <td colspan="7" class="p-10 text-center font-bold text-gray-500">Loading…</td>
           </tr>
         </tbody>
       </table>
     </div>
   </div>
 
+  <?!= include('html/shared/theme-utils'); ?>
   <script>
     var allData = [];
     var sortKey = 'finalScore';
@@ -119,20 +178,20 @@
     function renderTable(list) {
       var tbody = document.getElementById('tbody');
       if (!list.length) {
-        tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center font-bold text-gray-500">No data yet.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="p-10 text-center font-bold text-gray-500">No data yet.</td></tr>';
         return;
       }
       tbody.innerHTML = list.map(function (c) {
         var rec = c.recommendation || '';
         var rowCls = rec === 'Strong Hire' ? ' bg-primary/5 hover:bg-stone200/50' : ' hover:bg-stone200/30';
         return '<tr class="border-b border-stone200 last:border-b-0 cursor-pointer font-medium' + rowCls + '">' +
-          '<td class="p-4 border-r border-stone200 font-semibold">' + escHtml(c.name) + '</td>' +
-          '<td class="p-4 border-r border-stone200">' + escHtml(c.position) + '</td>' +
-          '<td class="p-4 border-r border-stone200 hidden md:table-cell tabular-nums">' + fmt(c.avgTechnical) + '</td>' +
-          '<td class="p-4 border-r border-stone200 hidden md:table-cell tabular-nums">' + fmt(c.avgLeadership) + '</td>' +
-          '<td class="p-4 border-r border-stone200 hidden md:table-cell tabular-nums">' + fmt(c.avgStakeholder) + '</td>' +
-          '<td class="p-4 border-r border-stone200 tabular-nums font-semibold text-lg bg-primary/5">' + fmt(c.finalScore) + '</td>' +
-          '<td class="p-4">' + badge(rec) + '</td>' +
+          '<td class="p-6 border-r border-stone200 font-semibold">' + escHtml(c.name) + '</td>' +
+          '<td class="p-6 border-r border-stone200">' + escHtml(c.position) + '</td>' +
+          '<td class="p-6 border-r border-stone200 hidden md:table-cell tabular-nums">' + fmt(c.avgTechnical) + '</td>' +
+          '<td class="p-6 border-r border-stone200 hidden md:table-cell tabular-nums">' + fmt(c.avgLeadership) + '</td>' +
+          '<td class="p-6 border-r border-stone200 hidden md:table-cell tabular-nums">' + fmt(c.avgStakeholder) + '</td>' +
+          '<td class="p-6 border-r border-stone200 tabular-nums font-semibold text-lg bg-primary/5">' + fmt(c.finalScore) + '</td>' +
+          '<td class="p-6">' + badge(rec) + '</td>' +
           '</tr>';
       }).join('');
     }
@@ -183,9 +242,10 @@
       })
       .withFailureHandler(function (e) {
         document.getElementById('tbody').innerHTML =
-          '<tr><td colspan="7" class="p-8 text-center font-bold text-[#b91c1c]">' + escHtml(e.message || e) + '</td></tr>';
+          '<tr><td colspan="7" class="p-10 text-center font-bold text-[#b91c1c]">' + escHtml(e.message || e) + '</td></tr>';
       })
       .getSummary();
+
   </script>
 </body>
 

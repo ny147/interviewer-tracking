@@ -26,6 +26,10 @@ function getWebAppUrl_() {
   return String(ScriptApp.getService().getUrl() || '').split('?')[0];
 }
 
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
+}
+
 function getAdminEmails_() {
   var raw = PropertiesService.getScriptProperties().getProperty('ADMIN_EMAILS') || '';
   return raw.split(',').map(function (email) {
@@ -264,6 +268,27 @@ function updateStatus(candidateId, status) {
   Candidates.updateCandidateStatus(candidateId, status);
   AuditLog.logEvent(email, 'STATUS_CHANGED', 'Candidate', candidateId, status);
   return { ok: true };
+}
+
+/**
+ * Deletes a candidate and dependent derived data (admin only).
+ * @param {string} candidateId
+ * @returns {{ ok: boolean, deletedEvaluations: number }}
+ */
+function deleteCandidate(candidateId) {
+  var email = Auth.getCurrentUserEmail();
+  Auth.requireAuthorised(email);
+  if (!Auth.isAdmin(email)) throw new Error('Admin access required.');
+
+  var deletedEvaluations = Evaluations.deleteEvaluationsForCandidate(candidateId);
+  Summary.removeSummary(candidateId);
+  var candidate = Candidates.removeCandidate(candidateId);
+  AuditLog.logEvent(email, 'CANDIDATE_REMOVED', 'Candidate', candidateId, candidate.name);
+
+  return {
+    ok: true,
+    deletedEvaluations: deletedEvaluations
+  };
 }
 
 /**

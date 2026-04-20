@@ -135,3 +135,39 @@ describe('Candidates — updateCandidateStatus', () => {
     assert.equal(row[4], 'Hired'); // Status is column index 4
   });
 });
+
+describe('Candidates — removeCandidate', () => {
+  it('removes the matching candidate row and returns the removed candidate', () => {
+    const { sandbox, sheets } = buildSandbox({
+      scriptProperties: { GOOGLE_SHEET_ID: 'test-id', ADMIN_EMAILS: 'admin@example.com' },
+      userEmail: 'admin@example.com',
+      sheetData: {
+        Candidates: [
+          ['ID', 'Name', 'Position', 'Level', 'Status', 'CreatedAt', 'CreatedBy'],
+          ['c1', 'Alice', 'SDE', 'Senior', 'Active', '2026-01-01', 'admin@example.com'],
+          ['c2', 'Bob', 'DE', 'Mid', 'Active', '2026-01-02', 'admin@example.com']
+        ],
+        Interviewers: [['Email', 'Name', 'Role', 'Active']]
+      }
+    });
+    loadFile(sandbox, path.join(SRC, 'Config.js'));
+    loadFile(sandbox, path.join(SRC, 'Auth.js'));
+    loadFile(sandbox, path.join(SRC, 'Candidates.js'));
+
+    const removed = sandbox.Candidates.removeCandidate('c1');
+
+    assert.equal(removed.id, 'c1');
+    assert.equal(removed.name, 'Alice');
+    assert.equal(sheets['Candidates']._rows.length, 2);
+    assert.equal(sheets['Candidates']._rows[1][0], 'c2');
+  });
+
+  it('throws when the candidate id does not exist', () => {
+    const sandbox = buildSandboxWithAuth('admin@example.com', []);
+
+    assert.throws(
+      () => sandbox.Candidates.removeCandidate('missing'),
+      /candidate not found/i
+    );
+  });
+});

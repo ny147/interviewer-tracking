@@ -1,0 +1,71 @@
+<script>
+  var THEME_STORAGE_KEY = 'interviewer-theme';
+  var systemThemeQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+
+  function getStoredTheme() {
+    try {
+      return localStorage.getItem(THEME_STORAGE_KEY);
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function setDocumentTheme(theme) {
+    var nextTheme = theme === 'dark' ? 'dark' : 'light';
+    document.documentElement.classList.toggle('dark', nextTheme === 'dark');
+    document.documentElement.dataset.theme = nextTheme;
+    document.documentElement.style.colorScheme = nextTheme;
+  }
+
+  function updateThemeToggle() {
+    var button = document.getElementById('themeToggle');
+    var label = document.getElementById('themeToggleLabel');
+    var isDark = document.documentElement.classList.contains('dark');
+
+    if (button) {
+      button.setAttribute('aria-pressed', String(isDark));
+      button.setAttribute('title', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+
+    if (label) {
+      label.textContent = isDark ? 'Light mode' : 'Dark mode';
+    }
+  }
+
+  function applyTheme(theme, persist) {
+    var nextTheme = theme === 'dark' ? 'dark' : 'light';
+    setDocumentTheme(nextTheme);
+    updateThemeToggle();
+
+    if (persist === false) return;
+
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+    } catch (err) {}
+  }
+
+  function toggleTheme() {
+    applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+  }
+
+  function bindSystemThemePreference() {
+    if (!systemThemeQuery || bindSystemThemePreference.bound) return;
+
+    var handleSystemThemeChange = function (event) {
+      if (getStoredTheme()) return;
+      setDocumentTheme(event.matches ? 'dark' : 'light');
+      updateThemeToggle();
+    };
+
+    if (systemThemeQuery.addEventListener) {
+      systemThemeQuery.addEventListener('change', handleSystemThemeChange);
+    } else if (systemThemeQuery.addListener) {
+      systemThemeQuery.addListener(handleSystemThemeChange);
+    }
+
+    bindSystemThemePreference.bound = true;
+  }
+
+  bindSystemThemePreference();
+  updateThemeToggle();
+</script>

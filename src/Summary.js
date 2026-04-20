@@ -243,9 +243,35 @@ var Summary = (function () {
     summarySheet.appendRow(newRow);
   }
 
+  /**
+   * Removes the summary row for a candidate if it exists.
+   * @param {string} candidateId
+   * @returns {boolean}
+   */
+  function removeSummary(candidateId) {
+    var summarySheet = getSummarySheet_();
+    var headers = getSummaryHeaders_();
+    var lastRow = summarySheet.getLastRow();
+    if (lastRow < 2) return false;
+
+    var candidateIdIdx = findHeaderIndex_(headers, SUMMARY_HEADER_ALIASES.candidateId);
+    if (candidateIdIdx === -1) return false;
+
+    var rows = summarySheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
+    for (var i = 0; i < rows.length; i++) {
+      if (String(rows[i][candidateIdIdx]) === candidateId) {
+        summarySheet.deleteRow(i + 2);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   return {
     computeScores:      computeScores,
     getRecommendation:  getRecommendation,
-    refreshSummary:     refreshSummary
+    refreshSummary:     refreshSummary,
+    removeSummary:      removeSummary
   };
 })();

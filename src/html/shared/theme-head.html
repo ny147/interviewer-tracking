@@ -1,0 +1,38 @@
+<script>
+  (function () {
+    var storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem('interviewer-theme');
+    } catch (err) {}
+
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = storedTheme || (prefersDark ? 'dark' : 'light');
+
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+  })();
+</script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: { sans: ['Epilogue', 'sans-serif'], display: ['Epilogue', 'sans-serif'] },
+        colors: {
+          base: '#FAFAF9',
+          dark: '#0F172A',
+          primary: '#10B981',
+          secondary: '#34D399',
+          textBody: '#44403C',
+          textHeader: '#064E3B',
+          stone200: '#E5E7EB',
+          rebel: '#10B981'
+        }
+      }
+    }
+  };
+</script>

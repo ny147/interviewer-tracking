@@ -158,3 +158,31 @@ describe('Evaluations — updateEvaluation', () => {
     );
   });
 });
+
+describe('Evaluations — deleteEvaluationsForCandidate', () => {
+  it('removes all evaluations for the candidate and returns the deleted count', () => {
+    const { sandbox, sheets } = buildSandbox({
+      scriptProperties: { GOOGLE_SHEET_ID: 'test-id', ADMIN_EMAILS: 'admin@example.com' },
+      userEmail: 'admin@example.com',
+      sheetData: {
+        Interviewers: [['Email', 'Name', 'Role', 'Active']],
+        Candidates: [['ID', 'Name', 'Position', 'Level', 'Status', 'CreatedAt', 'CreatedBy']],
+        Evaluations: [
+          EVAL_HEADERS,
+          ['ev1', 'c1', 'alice@example.com', 8, 7, 9, '', '2026-01-01'],
+          ['ev2', 'c2', 'bob@example.com', 7, 8, 7, '', '2026-01-02'],
+          ['ev3', 'c1', 'carol@example.com', 9, 9, 8, '', '2026-01-03']
+        ]
+      }
+    });
+    loadFile(sandbox, path.join(SRC, 'Config.js'));
+    loadFile(sandbox, path.join(SRC, 'Auth.js'));
+    loadFile(sandbox, path.join(SRC, 'Evaluations.js'));
+
+    const deletedCount = sandbox.Evaluations.deleteEvaluationsForCandidate('c1');
+
+    assert.equal(deletedCount, 2);
+    assert.equal(sheets['Evaluations']._rows.length, 2);
+    assert.equal(sheets['Evaluations']._rows[1][1], 'c2');
+  });
+});

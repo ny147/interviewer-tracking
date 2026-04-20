@@ -114,10 +114,29 @@ var Candidates = (function () {
     throw new Error('Candidate not found: ' + id);
   }
 
+  /**
+   * Removes the candidate row matching the given id.
+   * @param {string} id
+   * @returns {object} removed candidate
+   */
+  function removeCandidate(id) {
+    var sheet = getSheet_();
+    var rows = getAllRows_();
+    for (var i = 0; i < rows.length; i++) {
+      if (String(rows[i][COL.ID]) === id) {
+        var candidate = rowToObject_(rows[i]);
+        sheet.deleteRow(i + 2);
+        return candidate;
+      }
+    }
+    throw new Error('Candidate not found: ' + id);
+  }
+
   return {
     addCandidate: addCandidate,
     getAllCandidates: getAllCandidates,
     getCandidateById: getCandidateById,
-    updateCandidateStatus: updateCandidateStatus
+    updateCandidateStatus: updateCandidateStatus,
+    removeCandidate: removeCandidate
   };
 })();

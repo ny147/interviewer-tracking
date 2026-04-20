@@ -230,10 +230,32 @@ var Evaluations = (function () {
     throw new Error('Evaluation not found: ' + evalId);
   }
 
+  /**
+   * Removes all evaluations for the given candidate id.
+   * @param {string} candidateId
+   * @returns {number} deleted row count
+   */
+  function deleteEvaluationsForCandidate(candidateId) {
+    var col = getColumnMap_();
+    var sheet = getSheet_();
+    var rows = getAllRows_();
+    var deletedCount = 0;
+
+    for (var i = rows.length - 1; i >= 0; i--) {
+      if (String(getCell_(rows[i], col.candidateId)) === candidateId) {
+        sheet.deleteRow(i + 2);
+        deletedCount++;
+      }
+    }
+
+    return deletedCount;
+  }
+
   return {
     submitEvaluation: submitEvaluation,
     getEvaluationsForCandidate: getEvaluationsForCandidate,
     getEvaluationByInterviewer: getEvaluationByInterviewer,
-    updateEvaluation: updateEvaluation
+    updateEvaluation: updateEvaluation,
+    deleteEvaluationsForCandidate: deleteEvaluationsForCandidate
   };
 })();
