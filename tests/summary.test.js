@@ -175,3 +175,40 @@ describe('Summary — refreshSummary', () => {
     assert.equal(rows[1][6], 'Hire');
   });
 });
+
+describe('Summary — removeSummary', () => {
+  it('removes an existing summary row for the candidate', () => {
+    const { sandbox, sheets } = buildSandbox({
+      scriptProperties: { GOOGLE_SHEET_ID: 'test-id', ADMIN_EMAILS: 'admin@example.com' },
+      userEmail: 'admin@example.com',
+      sheetData: {
+        Candidates: [
+          ['ID', 'Name', 'Position', 'Level', 'Status', 'CreatedAt', 'CreatedBy'],
+          ['c1', 'Jane', 'SDE', 'Senior', 'Active', '', '']
+        ],
+        Evaluations: [EVAL_HEADERS],
+        Summary: [
+          SUMMARY_HEADERS,
+          ['c1', 'Jane', 8, 8, 8, 8, 'Strong Hire', '2026-01-01']
+        ],
+        Interviewers: [['Email', 'Name', 'Role', 'Active']]
+      }
+    });
+    loadFile(sandbox, path.join(SRC, 'Config.js'));
+    loadFile(sandbox, path.join(SRC, 'Auth.js'));
+    loadFile(sandbox, path.join(SRC, 'Summary.js'));
+
+    const removed = sandbox.Summary.removeSummary('c1');
+
+    assert.equal(removed, true);
+    assert.equal(sheets['Summary']._rows.length, 1);
+  });
+
+  it('returns false when no summary row exists for the candidate', () => {
+    const sandbox = buildSummarySandbox([], [], []);
+
+    const removed = sandbox.Summary.removeSummary('missing');
+
+    assert.equal(removed, false);
+  });
+});

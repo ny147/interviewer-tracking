@@ -7,76 +7,148 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;600&display=swap" rel="stylesheet">
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Epilogue', 'sans-serif'], display: ['Epilogue', 'sans-serif'] },
-          colors: { 
-            base: '#FAFAF9', 
-            dark: '#0F172A', 
-            primary: '#10B981', 
-            secondary: '#34D399',
-            textBody: '#44403C',
-            textHeader: '#064E3B',
-            stone200: '#E5E7EB',
-            rebel: '#10B981'
-          }
-        }
-      }
-    }
-  </script>
+  <?!= include('html/shared/theme-head'); ?>
   <style type="text/tailwindcss">
     @layer base {
-      body { @apply bg-base text-textBody; }
+      html { color-scheme: light; }
+      html.dark { color-scheme: dark; }
+      body {
+        @apply bg-base text-textBody;
+        min-height: 100vh;
+        transition: background-color 220ms ease, color 220ms ease;
+        background-image: radial-gradient(circle at top left, rgba(52, 211, 153, 0.2), transparent 28%), radial-gradient(circle at top right, rgba(16, 185, 129, 0.1), transparent 24%);
+      }
       h1, h2, h3, h4, th { @apply text-textHeader; }
       input[type="range"] { @apply border-none bg-transparent shadow-none p-0 cursor-pointer; }
-      textarea { @apply w-full p-4 border border-stone200 bg-white font-medium focus:outline-none focus:ring-2 focus:ring-primary/50 min-h-[120px] resize-y shadow-sm rounded-xl transition-all; }
+      textarea { @apply w-full p-6 border border-stone200 bg-white font-medium focus:outline-none focus:ring-2 focus:ring-primary/50 min-h-[120px] resize-y shadow-sm rounded-[24px] transition-all; }
     }
     .btn-primary { @apply inline-block bg-primary text-white rounded-full px-8 py-3 font-display font-medium tracking-wide shadow-md transition-all hover:scale-[1.02] active:bg-secondary whitespace-nowrap cursor-pointer hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed; }
     .nav-btn { @apply bg-white text-textBody rounded-full px-6 py-2 font-display font-medium shadow-sm border border-stone200 transition-all hover:scale-[1.02] cursor-pointer text-sm; }
-    .card { @apply bg-white shadow-sm border border-stone200 p-8 md:p-12 rounded-3xl mb-10; }
+    .card { @apply bg-white shadow-sm border border-stone200 p-10 md:p-16 rounded-[32px] mb-10; }
+
+    .theme-toggle { backdrop-filter: blur(18px); }
+
+    html.dark body {
+      background-color: #0F172A;
+      background-image: radial-gradient(circle at top left, rgba(52, 211, 153, 0.16), transparent 24%), radial-gradient(circle at top right, rgba(16, 185, 129, 0.1), transparent 22%), linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 1));
+    }
+
+    html.dark .bg-white,
+    html.dark .card {
+      background-color: rgba(15, 23, 42, 0.78) !important;
+    }
+
+    html.dark .bg-base,
+    html.dark .bg-base\/70 {
+      background-color: rgba(15, 23, 42, 0.72) !important;
+    }
+
+    html.dark .bg-stone200,
+    html.dark .bg-stone200\/20,
+    html.dark .bg-stone200\/30,
+    html.dark .bg-stone200\/40,
+    html.dark .bg-stone200\/50 {
+      background-color: rgba(148, 163, 184, 0.12) !important;
+    }
+
+    html.dark .border-stone200 {
+      border-color: rgba(148, 163, 184, 0.22) !important;
+    }
+
+    html.dark .text-textBody,
+    html.dark .text-dark {
+      color: #CBD5E1 !important;
+    }
+
+    html.dark .text-textHeader {
+      color: #ECFDF5 !important;
+    }
+
+    html.dark .bg-primary\/10 { background-color: rgba(16, 185, 129, 0.18) !important; }
+    html.dark .bg-primary\/20 { background-color: rgba(16, 185, 129, 0.22) !important; }
+    html.dark .bg-secondary\/20 { background-color: rgba(52, 211, 153, 0.18) !important; }
+
+    html.dark .nav-btn,
+    html.dark .theme-toggle {
+      background-color: rgba(15, 23, 42, 0.84) !important;
+      color: #E2E8F0 !important;
+      border-color: rgba(148, 163, 184, 0.22) !important;
+    }
+
+    html.dark textarea {
+      background-color: rgba(15, 23, 42, 0.82) !important;
+      color: #E2E8F0 !important;
+      border-color: rgba(148, 163, 184, 0.22) !important;
+    }
+
+    html.dark textarea::placeholder {
+      color: #94A3B8;
+    }
+
+    html.dark .shadow-sm,
+    html.dark .shadow-md,
+    html.dark .shadow-xl {
+      box-shadow: 0 20px 45px rgba(2, 6, 23, 0.25) !important;
+    }
+
+    html.dark .hover\:bg-stone200\/40:hover { background-color: rgba(148, 163, 184, 0.18) !important; }
+    html.dark .hover\:text-textHeader:hover { color: #ECFDF5 !important; }
+    html.dark .bg-red-50 { background-color: rgba(127, 29, 29, 0.24) !important; }
+    html.dark .border-red-200 { border-color: rgba(248, 113, 113, 0.35) !important; }
+    html.dark .text-red-700 { color: #FECACA !important; }
+    html.dark .bg-green-50 { background-color: rgba(20, 83, 45, 0.26) !important; }
+    html.dark .border-green-200 { border-color: rgba(74, 222, 128, 0.3) !important; }
+    html.dark .text-green-700 { color: #BBF7D0 !important; }
+    html.dark .bg-blue-50 { background-color: rgba(30, 64, 175, 0.22) !important; }
+    html.dark .border-blue-200 { border-color: rgba(96, 165, 250, 0.3) !important; }
+    html.dark .text-blue-700 { color: #BFDBFE !important; }
   </style>
 </head>
 <body>
-  <header class="bg-base/80 backdrop-blur-xl border-b border-stone200 text-textHeader p-6 md:px-10 flex justify-between items-center z-50 sticky top-0 mb-8">
+  <header class="bg-base/70 backdrop-blur-xl border-b border-stone200 text-textHeader p-6 md:px-10 flex justify-between items-center z-50 sticky top-0 mb-12">
     <h1 class="font-display text-3xl font-semibold tracking-tight text-textHeader">Interviewer</h1>
-    <nav class="hidden md:flex gap-6 items-center">
-      <a href="<?= webAppUrl ?>?page=candidates" target="_top" class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all p-1">Candidates</a>
-      <a href="<?= webAppUrl ?>?page=summary" target="_top" class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all p-1">Summary</a>
-      <? if (isAdmin) { ?><a href="<?= webAppUrl ?>?page=admin" target="_top" class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all p-1">Admin</a><? } ?>
-      <div class="flex items-center gap-4 ml-4">
-        <span class="text-sm font-bold text-textBody"><?= userEmail ?></span>
-        <a class="nav-btn" href="https://accounts.google.com/Logout" target="_top">Sign Out</a>
-      </div>
-    </nav>
+    <div class="flex items-center gap-3">
+      <button id="themeToggle" class="nav-btn theme-toggle !px-4 flex items-center gap-3" type="button" onclick="toggleTheme()" aria-label="Toggle color theme">
+        <span class="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_0_4px_rgba(16,185,129,0.16)]"></span>
+        <span id="themeToggleLabel" class="text-xs sm:text-sm">Dark mode</span>
+      </button>
+      <nav class="hidden md:flex gap-6 items-center">
+        <a href="<?= webAppUrl ?>?page=candidates" target="_top" class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all p-1">Candidates</a>
+        <a href="<?= webAppUrl ?>?page=summary" target="_top" class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all p-1">Summary</a>
+        <? if (isAdmin) { ?><a href="<?= webAppUrl ?>?page=admin" target="_top" class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all p-1">Admin</a><? } ?>
+        <div class="flex items-center gap-6 ml-4">
+          <span class="text-sm font-bold text-textBody"><?= userEmail ?></span>
+          <a class="nav-btn" href="https://accounts.google.com/Logout" target="_top">Sign Out</a>
+        </div>
+      </nav>
+    </div>
   </header>
 
-  <div class="max-w-2xl mx-auto p-4 md:p-8 mt-4">
-    <a class="inline-block font-display font-medium tracking-wide tracking-tight text-textBody hover:text-textHeader border-none mb-6 transition-colors" href="<?= webAppUrl ?>?page=candidates" target="_top">← Back to Candidates</a>
+  <div class="max-w-2xl mx-auto p-6 md:p-10 mt-4">
+    <a class="inline-block font-display font-medium tracking-wide tracking-tight text-textBody hover:text-textHeader border-none mb-8 transition-colors" href="<?= webAppUrl ?>?page=candidates" target="_top">← Back to Candidates</a>
 
     <div class="card">
-      <h2 class="font-display text-4xl font-semibold tracking-tight text-textHeader mb-8 border-b border-stone200 pb-4">Evaluation Form</h2>
-      <div id="msg" class="hidden mb-6 font-medium border border-stone200 p-4 shadow-sm rounded-xl"></div>
+      <h2 class="font-display text-4xl font-semibold tracking-tight text-textHeader mb-12 border-b border-stone200 pb-4">Evaluation Form</h2>
+      <div id="msg" class="hidden mb-8 font-medium border border-stone200 p-6 shadow-sm rounded-[24px]"></div>
 
       <form id="evalForm" onsubmit="submitForm(event)">
 
-        <div class="mb-8 p-4 bg-stone200/20 border border-stone200 shadow-sm rounded-xl flex flex-col hover:bg-stone200/40 transition-colors">
+        <div class="mb-12 p-6 bg-stone200/20 border border-stone200 shadow-sm rounded-[24px] flex flex-col hover:bg-stone200/40 transition-colors">
           <label class="flex justify-between font-display font-medium tracking-wide text-lg text-textHeader mb-2">Technical <span id="val-technical" class="text-white bg-primary font-bold px-3 py-0.5 rounded-full shadow-sm">5</span></label>
           <input type="range" id="technical" name="technical" min="1" max="10" value="5" class="w-full accent-primary h-2 bg-stone200 rounded-full outline-none" oninput="document.getElementById('val-technical').textContent=this.value">
         </div>
 
-        <div class="mb-8 p-4 bg-stone200/20 border border-stone200 shadow-sm rounded-xl flex flex-col hover:bg-stone200/40 transition-colors">
+        <div class="mb-12 p-6 bg-stone200/20 border border-stone200 shadow-sm rounded-[24px] flex flex-col hover:bg-stone200/40 transition-colors">
           <label class="flex justify-between font-display font-medium tracking-wide text-lg text-textHeader mb-2">Leadership <span id="val-leadership" class="text-white bg-primary font-bold px-3 py-0.5 rounded-full shadow-sm">5</span></label>
           <input type="range" id="leadership" name="leadership" min="1" max="10" value="5" class="w-full accent-primary h-2 bg-stone200 rounded-full outline-none" oninput="document.getElementById('val-leadership').textContent=this.value">
         </div>
 
-        <div class="mb-8 p-4 bg-stone200/20 border border-stone200 shadow-sm rounded-xl flex flex-col hover:bg-stone200/40 transition-colors">
+        <div class="mb-12 p-6 bg-stone200/20 border border-stone200 shadow-sm rounded-[24px] flex flex-col hover:bg-stone200/40 transition-colors">
           <label class="flex justify-between font-display font-medium tracking-wide text-lg text-textHeader mb-2">Stakeholder <span id="val-stakeholder" class="text-white bg-primary font-bold px-3 py-0.5 rounded-full shadow-sm">5</span></label>
           <input type="range" id="stakeholder" name="stakeholder" min="1" max="10" value="5" class="w-full accent-primary h-2 bg-stone200 rounded-full outline-none" oninput="document.getElementById('val-stakeholder').textContent=this.value">
         </div>
 
-        <div class="mb-8">
+        <div class="mb-12">
           <label class="block font-display font-medium tracking-wide text-xl mb-3">Notes</label>
           <textarea id="notes" placeholder="Optional observations, questions asked, red flags…"></textarea>
         </div>
@@ -86,6 +158,7 @@
     </div>
   </div>
 
+  <?!= include('html/shared/theme-utils'); ?>
   <script>
     var candidateId = '<?= candidateId ?>';
     var APP_URL     = '<?= webAppUrl ?>';
@@ -121,7 +194,7 @@
         btn.className = 'w-full inline-block bg-white text-textBody border border-stone200 rounded-full px-8 py-3 font-display font-medium tracking-wide shadow-sm transition-all hover:scale-[1.02] hover:shadow cursor-pointer disabled:opacity-50';
         // Show info banner
         var msg = document.getElementById('msg');
-        msg.className = 'mb-6 font-medium border border-blue-200 p-4 shadow-sm rounded-xl block bg-blue-50 text-blue-700';
+        msg.className = 'mb-8 font-medium border border-blue-200 p-6 shadow-sm rounded-[24px] block bg-blue-50 text-blue-700';
         msg.textContent = 'You have already evaluated this candidate. You can update your scores below.';
       })
       .withFailureHandler(function() {}) // silently ignore — will be submit mode
@@ -167,14 +240,15 @@
 
     function showError(e) {
       var msg = document.getElementById('msg');
-      msg.className = 'mb-6 font-medium border border-red-200 p-4 shadow-sm rounded-xl block bg-red-50 text-red-700';
+      msg.className = 'mb-8 font-medium border border-red-200 p-6 shadow-sm rounded-[24px] block bg-red-50 text-red-700';
       msg.textContent = typeof e === 'string' ? e : (e.message || 'An error occurred.');
     }
     function showSuccess(text) {
       var msg = document.getElementById('msg');
-      msg.className = 'mb-6 font-medium border border-green-200 p-4 shadow-sm rounded-xl block bg-green-50 text-green-700';
+      msg.className = 'mb-8 font-medium border border-green-200 p-6 shadow-sm rounded-[24px] block bg-green-50 text-green-700';
       msg.textContent = text;
     }
+
   </script>
 </body>
 </html>

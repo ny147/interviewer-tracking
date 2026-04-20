@@ -213,7 +213,99 @@ describe('Code — updateStatus', () => {
   });
 });
 
+describe('Code — deleteCandidate', () => {
+  it('deletes the candidate, removes dependent data, and writes an audit log entry', () => {
+    var removedCandidateId = null;
+    var deletedEvaluationsCandidateId = null;
+    var deletedSummaryCandidateId = null;
+    var auditArgs = null;
+    const sandbox = buildCodeSandbox({
+      Candidates: {
+        removeCandidate: function (candidateId) {
+          removedCandidateId = candidateId;
+          return { id: candidateId, name: 'Alice' };
+        }
+      },
+      Evaluations: {
+        deleteEvaluationsForCandidate: function (candidateId) {
+          deletedEvaluationsCandidateId = candidateId;
+          return 2;
+        }
+      },
+      Summary: {
+        removeSummary: function (candidateId) {
+          deletedSummaryCandidateId = candidateId;
+          return true;
+        }
+      },
+      AuditLog: {
+        logEvent: function () {
+          auditArgs = Array.prototype.slice.call(arguments);
+        }
+      }
+    });
+
+    const result = sandbox.deleteCandidate('c1');
+
+    assert.equal(removedCandidateId, 'c1');
+    assert.equal(deletedEvaluationsCandidateId, 'c1');
+    assert.equal(deletedSummaryCandidateId, 'c1');
+    assert.equal(result.ok, true);
+    assert.equal(result.deletedEvaluations, 2);
+    assert.deepEqual(auditArgs, ['admin@example.com', 'CANDIDATE_REMOVED', 'Candidate', 'c1', 'Alice']);
+  });
+
+  it('does not remove the candidate when dependent cleanup fails', () => {
+    var removedCandidateId = null;
+    var removedSummaryCandidateId = null;
+    const sandbox = buildCodeSandbox({
+      Candidates: {
+        removeCandidate: function (candidateId) {
+          removedCandidateId = candidateId;
+          return { id: candidateId, name: 'Alice' };
+        }
+      },
+      Evaluations: {
+        deleteEvaluationsForCandidate: function () {
+          throw new Error('Evaluation cleanup failed.');
+        }
+      },
+      Summary: {
+        removeSummary: function (candidateId) {
+          removedSummaryCandidateId = candidateId;
+          return true;
+        }
+      }
+    });
+
+    assert.throws(
+      function () { sandbox.deleteCandidate('c1'); },
+      /evaluation cleanup failed/i
+    );
+    assert.equal(removedCandidateId, null);
+    assert.equal(removedSummaryCandidateId, null);
+  });
+});
+
 describe('HTML regressions', () => {
+  it('shares persisted theme behaviour through reusable partials across all app pages', () => {
+    ['admin.html', 'candidates.html', 'evaluation.html', 'summary.html', 'report.html'].forEach(function (fileName) {
+      const html = fs.readFileSync(path.join(SRC, 'html', fileName), 'utf8');
+
+      assert.match(html, /include\('html\/shared\/theme-head'\)/);
+      assert.match(html, /include\('html\/shared\/theme-utils'\)/);
+      assert.match(html, /id="themeToggle"/);
+    });
+
+    const themeHead = fs.readFileSync(path.join(SRC, 'html', 'shared', 'theme-head.html'), 'utf8');
+    const themeUtils = fs.readFileSync(path.join(SRC, 'html', 'shared', 'theme-utils.html'), 'utf8');
+
+    assert.match(themeHead, /darkMode:\s*'class'/);
+    assert.match(themeHead, /localStorage\.getItem\('interviewer-theme'\)/);
+    assert.match(themeUtils, /function toggleTheme\(/);
+    assert.match(themeUtils, /function bindSystemThemePreference\(/);
+  });
+
   it('uses a top-level window open fallback when evaluation save succeeds', () => {
     const html = fs.readFileSync(path.join(SRC, 'html', 'evaluation.html'), 'utf8');
 
@@ -236,6 +328,13 @@ describe('HTML regressions', () => {
 
     assert.match(html, /updateStatus\(/);
     assert.match(html, /google\.script\.run[\s\S]*\.updateStatus\(/);
+  });
+
+  it('renders a client-side candidate removal control on the candidates page', () => {
+    const html = fs.readFileSync(path.join(SRC, 'html', 'candidates.html'), 'utf8');
+
+    assert.match(html, /confirmRemoveCandidate\(/);
+    assert.match(html, /google\.script\.run[\s\S]*\.deleteCandidate\(/);
   });
 
   it('shows three score columns on the summary page', () => {
