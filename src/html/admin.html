@@ -155,23 +155,35 @@
   </style>
 </head>
 <body>
-  <header class="bg-base/70 backdrop-blur-xl border-b border-stone200 text-textHeader p-6 md:px-10 flex justify-between items-center z-50 sticky top-0 mb-12">
+  <header class="bg-base/70 backdrop-blur-xl border-b border-stone200 text-textHeader p-6 md:px-10 flex flex-wrap justify-between items-center z-50 sticky top-0 mb-12">
     <h1 class="font-display text-3xl font-semibold tracking-tight text-textHeader">Interviewer</h1>
     <div class="flex items-center gap-3">
       <button id="themeToggle" class="nav-btn theme-toggle !px-4 flex items-center gap-3" type="button" onclick="toggleTheme()" aria-label="Toggle color theme">
         <span class="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_0_4px_rgba(16,185,129,0.16)]"></span>
-        <span id="themeToggleLabel" class="text-xs sm:text-sm">Dark mode</span>
+        <span id="themeToggleLabel" class="text-xs sm:text-sm hidden sm:inline">Dark mode</span>
+      </button>
+      <button class="nav-btn md:hidden px-4" aria-label="Toggle Menu" onclick="document.getElementById('mobileMenu').classList.toggle('hidden')">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
       </button>
       <nav class="hidden md:flex gap-6 items-center">
         <a href="<?= webAppUrl ?>?page=candidates" target="_top" class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all p-1">Candidates</a>
         <a href="<?= webAppUrl ?>?page=summary" target="_top" class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all p-1">Summary</a>
         <a href="<?= webAppUrl ?>?page=admin" target="_top" class="font-display font-medium tracking-wide text-textHeader font-semibold p-1">Admin</a>
-        <div class="flex items-center gap-6 ml-4">
-          <span class="text-sm font-bold text-textBody"><?= userEmail ?></span>
+        <div class="flex items-center gap-6 ml-4 border-l border-stone200 pl-6">
+          <span class="text-sm font-bold text-textBody truncate max-w-[120px]"><?= userEmail ?></span>
           <a class="nav-btn" href="https://accounts.google.com/Logout" target="_top">Sign Out</a>
         </div>
       </nav>
     </div>
+    <nav id="mobileMenu" class="hidden w-full flex-col gap-4 mt-6 md:hidden border-t border-stone200 pt-6">
+      <a href="<?= webAppUrl ?>?page=candidates" target="_top" class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all">Candidates</a>
+      <a href="<?= webAppUrl ?>?page=summary" target="_top" class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all">Summary</a>
+      <a href="<?= webAppUrl ?>?page=admin" target="_top" class="font-display font-medium tracking-wide text-textHeader font-semibold">Admin</a>
+      <div class="flex items-center justify-between mt-4 pt-4 border-t border-stone200">
+        <span class="text-sm font-bold text-textBody truncate mr-4"><?= userEmail ?></span>
+        <a class="nav-btn" href="https://accounts.google.com/Logout" target="_top">Sign Out</a>
+      </div>
+    </nav>
   </header>
 
   <div class="max-w-[1000px] mx-auto p-6 md:p-10 mt-4">
@@ -185,9 +197,9 @@
 
     <!-- ── Tab 1: Interviewers ─────────────────────────────────────────── -->
     <div class="tab-panel active" id="tab-interviewers">
-      <div class="flex justify-between items-center mb-8 border-b border-stone200 pb-4">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 border-b border-stone200 pb-4 gap-4">
         <h2 class="font-semibold text-2xl tracking-tight text-textHeader">Interviewers</h2>
-        <button class="btn-primary" onclick="openAddModal()">+ Add</button>
+        <button class="btn-primary w-full sm:w-auto" onclick="openAddModal()">+ Add</button>
       </div>
       <div class="overflow-x-auto bg-white border border-stone200 shadow-sm rounded-[24px]">
         <table class="w-full text-left border-collapse" >
@@ -237,9 +249,9 @@
         
         <p class="font-medium text-sm text-textBody/70 mt-6 px-4">These values represent relative distribution weights across evaluation categories.</p>
         
-        <div class="flex flex-col sm:flex-row justify-end gap-6 mt-8 pt-6 border-t border-stone200">
-          <button class="btn-secondary" onclick="resetWeights()">Reset to Equal</button>
-          <button class="btn-primary" onclick="saveWeights()">Save Weights</button>
+        <div class="flex flex-col sm:flex-row justify-end gap-4 mt-8 pt-6 border-t border-stone200">
+          <button class="btn-secondary w-full sm:w-auto" onclick="resetWeights()">Reset to Equal</button>
+          <button class="btn-primary w-full sm:w-auto" onclick="saveWeights()">Save Weights</button>
         </div>
       </div>
     </div>
@@ -289,9 +301,9 @@
         </select>
         <p class="text-xs text-textBody/70 mt-2 font-medium">Admins can manage interviewers, score weights, and view audit logs.</p>
       </div>
-      <div class="flex justify-end gap-3 mt-8 pt-4 border-t border-stone200">
-        <button class="btn-secondary" onclick="closeAddModal(); event.preventDefault()">Cancel</button>
-        <button class="btn-primary" onclick="submitAddInterviewer(); event.preventDefault()">Add Access</button>
+      <div class="flex flex-col sm:flex-row justify-end gap-3 mt-8 pt-4 border-t border-stone200">
+        <button class="btn-secondary w-full sm:w-auto" onclick="closeAddModal(); event.preventDefault()">Cancel</button>
+        <button class="btn-primary w-full sm:w-auto" onclick="submitAddInterviewer(); event.preventDefault()">Add Access</button>
       </div>
     </div>
   </div>

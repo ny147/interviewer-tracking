@@ -105,23 +105,35 @@
   </style>
 </head>
 <body>
-  <header class="bg-base/70 backdrop-blur-xl border-b border-stone200 text-textHeader p-6 md:px-10 flex justify-between items-center z-50 sticky top-0 mb-12">
+  <header class="bg-base/70 backdrop-blur-xl border-b border-stone200 text-textHeader p-6 md:px-10 flex flex-wrap justify-between items-center z-50 sticky top-0 mb-12">
     <h1 class="font-display text-3xl font-semibold tracking-tight text-textHeader">Interviewer</h1>
     <div class="flex items-center gap-3">
       <button id="themeToggle" class="nav-btn theme-toggle !px-4 flex items-center gap-3" type="button" onclick="toggleTheme()" aria-label="Toggle color theme">
         <span class="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_0_4px_rgba(16,185,129,0.16)]"></span>
-        <span id="themeToggleLabel" class="text-xs sm:text-sm">Dark mode</span>
+        <span id="themeToggleLabel" class="text-xs sm:text-sm hidden sm:inline">Dark mode</span>
+      </button>
+      <button class="nav-btn md:hidden px-4" aria-label="Toggle Menu" onclick="document.getElementById('mobileMenu').classList.toggle('hidden')">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
       </button>
       <nav class="hidden md:flex gap-6 items-center">
         <a href="<?= webAppUrl ?>?page=candidates" target="_top" class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all p-1">Candidates</a>
         <a href="<?= webAppUrl ?>?page=summary" target="_top" class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all p-1">Summary</a>
         <? if (isAdmin) { ?><a href="<?= webAppUrl ?>?page=admin" target="_top" class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all p-1">Admin</a><? } ?>
-        <div class="flex items-center gap-6 ml-4">
-          <span class="text-sm font-bold text-textBody"><?= userEmail ?></span>
+        <div class="flex items-center gap-6 ml-4 border-l border-stone200 pl-6">
+          <span class="text-sm font-bold text-textBody truncate max-w-[120px]"><?= userEmail ?></span>
           <a class="nav-btn" href="https://accounts.google.com/Logout" target="_top">Sign Out</a>
         </div>
       </nav>
     </div>
+    <nav id="mobileMenu" class="hidden w-full flex-col gap-4 mt-6 md:hidden border-t border-stone200 pt-6">
+      <a href="<?= webAppUrl ?>?page=candidates" target="_top" class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all">Candidates</a>
+      <a href="<?= webAppUrl ?>?page=summary" target="_top" class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all">Summary</a>
+      <? if (isAdmin) { ?><a href="<?= webAppUrl ?>?page=admin" target="_top" class="font-display font-medium tracking-wide text-textBody hover:text-textHeader transition-all">Admin</a><? } ?>
+      <div class="flex items-center justify-between mt-4 pt-4 border-t border-stone200">
+        <span class="text-sm font-bold text-textBody truncate mr-4"><?= userEmail ?></span>
+        <a class="nav-btn" href="https://accounts.google.com/Logout" target="_top">Sign Out</a>
+      </div>
+    </nav>
   </header>
 
   <div class="max-w-2xl mx-auto p-6 md:p-10 mt-4">
@@ -153,7 +165,7 @@
           <textarea id="notes" placeholder="Optional observations, questions asked, red flags…"></textarea>
         </div>
 
-        <button type="submit" class="btn-primary" id="submitBtn">Submit Evaluation</button>
+        <button type="submit" class="btn-primary w-full sm:w-auto" id="submitBtn">Submit Evaluation</button>
       </form>
     </div>
   </div>
@@ -214,10 +226,18 @@
       var notes = document.getElementById('notes').value.trim();
 
       function onSuccess() {
-        showSuccess((existingEvalId ? 'Evaluation updated' : 'Evaluation submitted') + '! Redirecting…');
-        setTimeout(function() {
-          goToCandidates();
-        }, 900);
+        btn.disabled = false;
+        btn.textContent = existingEvalId ? 'Update Evaluation' : 'Submit Evaluation';
+        
+        var actionText = existingEvalId ? 'updated' : 'submitted';
+        showSuccess('Evaluation successfully ' + actionText + '!');
+        
+        if (!existingEvalId) {
+            existingEvalId = true; // Just in case, block from re-submitting as new
+        }
+
+        // Scroll back up to see the success message
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
       function onFailure(err) {
         btn.disabled = false;
